@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+OPENVPN_NETWORK='10.8.0.0'
+OPENVPN_PROTOCOL='udp'
+OPENVPN_PORT=1194
+
+USE_SAME_NAMESERVERS_AS_HOST=0
+NAMESERVER_1='8.8.8.8'
+NAMESERVER_2='8.8.4.4'
+
+LZO_COMPRESSION=1
+
+RUN_UFW_RULES=0
+
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
     exit 1
@@ -7,7 +19,7 @@ fi
 
 # Install packages.
 apt-get update -y
-apt-get install -y openvpn easy-rsa openssl ufw
+apt-get install -y openvpn easy-rsa openssl ufw sed
 
 # Remove useless folders if they exist and are empty.
 rmdir /etc/openvpn/server 1> /dev/null 2>&1
@@ -24,8 +36,8 @@ gunzip /etc/openvpn/server.conf.gz
 sed -i '/;push "redirect-gateway def1 bypass-dhcp"/s/^;//g' /etc/openvpn/server.conf
 
 # Uncomment and set DNS servers.
-sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS 8.8.8.8"/' /etc/openvpn/server.conf
-sed -i -r '0,/dhcp-option DNS 8.8.8.8/s/8.8.8.8/8.8.4.4/' /etc/openvpn/server.conf
+sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS 8.8.4.4"/' /etc/openvpn/server.conf
+sed -i -r '0,/dhcp-option DNS 8.8.4.4/s/8.8.4.4/8.8.8.8/' /etc/openvpn/server.conf
 
 # Uncomment user and group lines.
 sed -i '/;user nobody/s/^;//g' /etc/openvpn/server.conf
@@ -44,4 +56,11 @@ if [[ "${?}" != '0' ]]; then
     echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 fi
 
+exit
+
+# TODO
+# Apply NAT rules
+
+ufw allow ssh
+ufw allow 1194/udp
 
