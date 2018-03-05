@@ -27,3 +27,8 @@ if [[ "${?}" != '0' ]]; then
     echo "alias ls='ls \${LS_OPTIONS}'" >> /etc/bash.bashrc
 fi
 
+# Source global bashrc file that we just changed.
+. /etc/bash.bashrc
+
+echo '> Finished.'
+
