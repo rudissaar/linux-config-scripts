@@ -33,8 +33,12 @@ if [[ "${?}" != '0' ]]; then
     echo "alias ls='ls \${LS_OPTIONS}'" >> /etc/bash.bashrc
 fi
 
-# Source global bashrc file that we just changed.
+# Source bashrc files.
 . /etc/bash.bashrc
+
+if [[ -f "${HOME}/.bashrc" ]]; then
+    . "${HOME}/.bashrc"
+fi
 
 echo '> Finished.'
 
