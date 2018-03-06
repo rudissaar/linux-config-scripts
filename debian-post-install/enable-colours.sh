@@ -33,12 +33,14 @@ if [[ "${?}" != '0' ]]; then
     echo "alias ls='ls \${LS_OPTIONS}'" >> /etc/bash.bashrc
 fi
 
-# Source bashrc files.
-. /etc/bash.bashrc
+grep -Fq "alias grep='grep --color=auto'" /etc/bash.bashrc
 
-if [[ -f "${HOME}/.bashrc" ]]; then
-    . "${HOME}/.bashrc"
+if [[ "${?}" != '0' ]]; then
+    echo "alias grep='grep --color=auto'" >> /etc/bash.bashrc
 fi
+
+# Source bashrc files.
+exec bash
 
 echo '> Finished.'
 
