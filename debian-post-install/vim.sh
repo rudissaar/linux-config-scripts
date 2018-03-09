@@ -32,6 +32,13 @@ if [[ "${?}" != '0' ]]; then
     echo 'syntax on' >> /etc/skel/.vimrc
 fi
 
+# Display line numbers.
+grep -Fq 'set number' /etc/skel/.vimrc
+
+if [[ "${?}" != '0' ]]; then
+    echo 'set number' >> /etc/skel/.vimrc
+fi
+
 # Disable visual mode.
 grep -Fq 'set mouse-=a' /etc/skel/.vimrc
 
