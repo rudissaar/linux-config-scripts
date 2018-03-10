@@ -73,10 +73,12 @@ if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
     if [[ -f /etc/login.defs ]]; then
         UID_MIN="$(grep '^UID_MIN' /etc/login.defs)"
         UID_MAX="$(grep '^UID_MAX' /etc/login.defs)"
-        DIRS="$(awk -F':' -v "min=${UID_MIN##UID_MIN}" -v "max=${UID_MAX##UID_MAX}" '{ if ( $3 >= min && $3 <= max ) print $6}' /etc/passwd)"
+        USERNAMES="$(awk -F':' -v "min=${UID_MIN##UID_MIN}" -v "max=${UID_MAX##UID_MAX}" '{ if ( $3 >= min && $3 <= max ) print $1}' /etc/passwd)"
 
-        for DIR in ${DIRS}; do
-	    cp /etc/skel/.vimrc "${DIR}/.vimrc"
+        for USERNAME in ${USERNAMES}; do
+            HOME_DIR=$(eval echo "~${USERNAME}")
+	        cp /etc/skel/.vimrc "${HOME_DIR}/.vimrc"
+            chown ${USERNAME}:${USERNAME} "${HOME_DIR}/.vimrc"
         done
     else
         echo '> Unable to overwrite .vimrc for normal users, missing file: "/etc/login.defs".'
