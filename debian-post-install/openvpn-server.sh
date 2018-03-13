@@ -56,11 +56,14 @@ if [[ "${?}" != '0' ]]; then
     echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 fi
 
-exit
-
-# TODO
-# Apply NAT rules
-
-ufw allow ssh
-ufw allow 1194/udp
+if [[ "${RUN_UFW_RULES}" = '1' ]]; then
+    ufw allow ssh
+    ufw allow proto ${OPENVPN_PROTOCOL} to 0.0.0.0/0 port ${OPENVPN_PORT}
+else
+    echo '> In order to complete installation you have to apply firewall rules:'
+    echo
+    echo '> UFW:'
+    echo 'ufw allow ssh # Or any other rule that you use to connect to this machine.'
+    echo 'ufw allow proto '${OPENVPN_PROTOCOL}' to 0.0.0.0/0 port '${OPENVPN_PORT}
+fi
 
