@@ -11,6 +11,7 @@ NAMESERVER_2='8.8.4.4'
 LZO_COMPRESSION=1
 
 RUN_UFW_RULES=0
+RUN_UFW_RULES_DEFAULT_SSH=1
 
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
@@ -36,8 +37,12 @@ gunzip /etc/openvpn/server.conf.gz
 sed -i '/;push "redirect-gateway def1 bypass-dhcp"/s/^;//g' /etc/openvpn/server.conf
 
 # Uncomment and set DNS servers.
-sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS 8.8.4.4"/' /etc/openvpn/server.conf
-sed -i -r '0,/dhcp-option DNS 8.8.4.4/s/8.8.4.4/8.8.8.8/' /etc/openvpn/server.conf
+sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS '${NAMESERVER_2}'"/' /etc/openvpn/server.conf
+sed -i -r '0,/dhcp-option DNS '${NAMESERVER_2}'/s/'${NAMESERVER_2}'/'${NAMESERVER_1}'/' /etc/openvpn/server.conf
+
+if [[ "${LZO_COMPRESSION}" = '1' ]]; then
+    sed -i '/;comp-lzo/s/^;//g' /etc/openvpn/server.conf
+fi
 
 # Uncomment user and group lines.
 sed -i '/;user nobody/s/^;//g' /etc/openvpn/server.conf
@@ -56,14 +61,19 @@ if [[ "${?}" != '0' ]]; then
     echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 fi
 
+# Block that either gives information about firewall rules that you should apply, or just applies them.
 if [[ "${RUN_UFW_RULES}" = '1' ]]; then
-    ufw allow ssh
+    if [[ "${RUN_UFW_RULES_DEFAULT_SSH}" = '1' ]]; then
+        ufw allow ssh
+    fi
+
     ufw allow proto ${OPENVPN_PROTOCOL} to 0.0.0.0/0 port ${OPENVPN_PORT}
+    ufw enable
 else
     echo '> In order to complete installation you have to apply firewall rules:'
-    echo
-    echo '> UFW:'
-    echo 'ufw allow ssh # Or any other rule that you use to connect to this machine.'
+    echo -n 'ufw allow ssh '
+    echo '# Or any other rule that you use to connect to this machine.'
     echo 'ufw allow proto '${OPENVPN_PROTOCOL}' to 0.0.0.0/0 port '${OPENVPN_PORT}
+    echo 'ufw enable'
 fi
 
