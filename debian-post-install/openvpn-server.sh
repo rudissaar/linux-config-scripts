@@ -10,6 +10,8 @@ NAMESERVER_2='8.8.4.4'
 
 LZO_COMPRESSION=1
 
+RUN_UFW_FORWARD_POLICY=1
+RUN_UFW_NAT=1
 RUN_UFW_RULES=0
 RUN_UFW_RULES_DEFAULT_SSH=1
 
@@ -59,6 +61,17 @@ grep -Fq 'net.ipv4.ip_forward=1' /etc/sysctl.conf
 
 if [[ "${?}" != '0' ]]; then
     echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+fi
+
+# Change UFW's default forward policy.
+if [[ "${RUN_UFW_FORWARD_POLICY}" = '1' ]]; then
+    sed -i '/^DEFAULT_FORWARD_POLICY="DROP"$/s/DROP/ACCEPT/' /etc/default/ufw
+fi
+
+# Active NAT for OpenVPN subnet.
+if [[ "${RUN_UFW_NAT}" = '1' ]]; then
+    echo
+    #sed -i "0,/^$/s/^$/\n# NAT rules for OpenVPN ~erver.\n*nat/" /etc/ufw/before.rules    
 fi
 
 # Block that either gives information about firewall rules that you should apply, or just applies them.
