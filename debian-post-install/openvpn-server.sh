@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+GATEWAY_INTERFACE='eth0'
 OPENVPN_NETWORK='10.8.0.0'
 OPENVPN_PROTOCOL='udp'
 OPENVPN_PORT=1194
@@ -70,14 +71,13 @@ fi
 
 # Active NAT for OpenVPN subnet.
 if [[ "${RUN_UFW_NAT}" = '1' ]]; then
-    BLOCK="\n# NAT rules for OpenVPN server.\n"
-    BLOCK="${BLOCK}*nat\n"
-    BLOCK="${BLOCK}:POSTROUTING ACCEPT [0.0]\n"
-    BLOCK="${BLOCK}-A POSTROUTING -s ${OPENVPN_NETWORK}/24 -o eth0 -j MASQUERADE\n"
-    BLOCK="${BLOCK}COMMIT\n"
+    BLOCK="\\n\# NAT rules for OpenVPN server.\\n"
+    BLOCK="${BLOCK}*nat\\n"
+    BLOCK="${BLOCK}:POSTROUTING ACCEPT [0.0]\\n"
+    BLOCK="${BLOCK}-A POSTROUTING -s ${OPENVPN_NETWORK}\/24 \\-o ${GATEWAY_INTERFACE} \\-j MASQUERADE\\n"
+    BLOCK="${BLOCK}COMMIT\\n"
 
-    echo "$BLOCK"
-    #sed -i '0,/^$/s/^$/'"${BLOCK}"'/' /etc/ufw/before.rules
+    sed -i '0,/^$/s/^$/'"${BLOCK}"'/' /etc/ufw/before.rules
 fi
 
 # Block that either gives information about firewall rules that you should apply, or just applies them.
