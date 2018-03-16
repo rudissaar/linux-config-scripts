@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-GATEWAY_INTERFACE='eth0'
+GATEWAY_INTERFACE=''
 OPENVPN_NETWORK='10.8.0.0'
 OPENVPN_PROTOCOL='udp'
 OPENVPN_PORT=1194
@@ -23,7 +23,7 @@ fi
 
 # Install packages.
 apt-get update -y
-apt-get install -y openvpn easy-rsa openssl ufw sed
+apt-get install -y openvpn easy-rsa openssl ufw net-tools sed
 
 # Remove useless folders if they exist and are empty.
 rmdir /etc/openvpn/server 1> /dev/null 2>&1
@@ -38,6 +38,20 @@ gunzip /etc/openvpn/server.conf.gz
 
 # Uncomment redirect-gateway line.
 sed -i '/;push "redirect-gateway def1 bypass-dhcp"/s/^;//g' /etc/openvpn/server.conf
+
+# Try to fetch nameservers from /etc/resolv.conf
+if [[ "${USE_SAME_NAMESERVERS_AS_HOST}" = '1' ]]; then
+    NAMESERVERS=($(cat /etc/resolv.conf | grep nameserver | head -n 2 | cut -d ' ' -f 2))
+
+    if [[ ${#NAMESERVERS[@]} -lt 1 ]]; then
+        echo "> Unable to identify Host's Nameservers, using fallback."
+    elif [[ ${#NAMESERVERS[@]} -eq 1 ]]; then
+        NAMESERVER_1="${NAMESERVERS[0]}"
+    else
+        NAMESERVER_1="${NAMESERVERS[0]}"
+        NAMESERVER_2="${NAMESERVERS[1]}"
+    fi
+fi
 
 # Uncomment and set DNS servers.
 sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS '${NAMESERVER_2}'"/' /etc/openvpn/server.conf
@@ -71,13 +85,24 @@ fi
 
 # Active NAT for OpenVPN subnet.
 if [[ "${RUN_UFW_NAT}" = '1' ]]; then
-    BLOCK="\\n\# NAT rules for OpenVPN server.\\n"
-    BLOCK="${BLOCK}*nat\\n"
-    BLOCK="${BLOCK}:POSTROUTING ACCEPT [0.0]\\n"
-    BLOCK="${BLOCK}-A POSTROUTING -s ${OPENVPN_NETWORK}\/24 \\-o ${GATEWAY_INTERFACE} \\-j MASQUERADE\\n"
-    BLOCK="${BLOCK}COMMIT\\n"
+    grep -Fq '# NAT rules for OpenVPN server.' /etc/ufw/before.rules
 
-    sed -i '0,/^$/s/^$/'"${BLOCK}"'/' /etc/ufw/before.rules
+    if [[ "${?}" != '0' ]]; then
+        if [[ -z "${GATEWAY_INTERFACE}" ]]; then
+            GATEWAY_INTERFACE="$(echo $(route | grep default) | cut -d ' ' -f 8)"
+        else
+            echo '> Unable to identify default Network Interface, please define it manually.'
+            exit 1
+        fi
+
+        BLOCK="\\n\# NAT rules for OpenVPN server.\\n"
+        BLOCK="${BLOCK}*nat\\n"
+        BLOCK="${BLOCK}:POSTROUTING ACCEPT [0.0]\\n"
+        BLOCK="${BLOCK}-A POSTROUTING -s ${OPENVPN_NETWORK}\/24 \\-o ${GATEWAY_INTERFACE} \\-j MASQUERADE\\n"
+        BLOCK="${BLOCK}COMMIT\\n"
+
+        sed -i '0,/^$/s/^$/'"${BLOCK}"'/' /etc/ufw/before.rules
+    fi
 fi
 
 # Block that either gives information about firewall rules that you should apply, or just applies them.
