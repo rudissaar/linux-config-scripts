@@ -11,6 +11,8 @@ NAMESERVER_2='8.8.4.4'
 
 LZO_COMPRESSION=1
 
+EDIT_VARS=0
+
 RUN_UFW_FORWARD_POLICY=1
 RUN_UFW_NAT=1
 RUN_UFW_RULES=0
@@ -35,6 +37,34 @@ cp \
     /etc/openvpn/server.conf.gz
 
 gunzip /etc/openvpn/server.conf.gz
+
+
+# Copy Easy RSA files to OpenVPN directory.
+cp -r /usr/share/easy-rsa/* /etc/openvpn/easy-rsa
+
+# Make sure file /etc/openvpn/easy-rsa/openssl.cnf exists.
+if [[ ! -f /etc/openvpn/easy-rsa/openssl.cnf ]]; then
+    OPENSSL_CONFIG="$(ls /etc/openvpn/easy-rsa/openssl-*.cnf | sort | tail -n 1)"
+    ln -sf "${OPENSSL_CONFIG}" /etc/openvpn/easy-rsa/openssl.cnf
+fi
+
+# Makse sure keys directory exist.
+if [[ ! -d /etc/openvpn/easy-rsa/keys ]]; then
+    mkdir /etc/openvpn/easy-rsa/keys
+fi
+
+# Edit vars with your default text editor, using vi as fallback.
+if [[ "${EDIT_VARS}" = '1' ]]; then
+    ${EDITOR:-vi} /etc/openvpn/easy-rsa/vars
+fi
+
+# Generate keys.
+cd /etc/openvpn/easy-rsa
+source ./vars
+
+# Generate new Diffie-Hellman key.
+./build-dh
+cd -
 
 # Uncomment redirect-gateway line.
 sed -i '/;push "redirect-gateway def1 bypass-dhcp"/s/^;//g' /etc/openvpn/server.conf
