@@ -38,9 +38,12 @@ cp \
 
 gunzip /etc/openvpn/server.conf.gz
 
-
 # Copy Easy RSA files to OpenVPN directory.
-cp -r /usr/share/easy-rsa/* /etc/openvpn/easy-rsa
+if [[ ! -d /etc/openvpn/easy-rsa ]]; then
+    mkdir /etc/openvpn/easy-rsa
+fi
+
+cp -r /usr/share/easy-rsa/* /etc/openvpn/easy-rsa/
 
 # Make sure file /etc/openvpn/easy-rsa/openssl.cnf exists.
 if [[ ! -f /etc/openvpn/easy-rsa/openssl.cnf ]]; then
@@ -60,11 +63,21 @@ fi
 
 # Generate keys.
 cd /etc/openvpn/easy-rsa
-source ./vars
+source ./vars 1> /dev/null
+./clean-all
+touch /etc/openvpn/easy-rsa/keys/index.txt.attr
 
 # Generate new Diffie-Hellman key.
 ./build-dh
-cd -
+mv /etc/openvpn/easy-rsa/keys/dh*.pem /etc/openvpn/
+
+# Generate CA key.
+./build-ca
+
+# Generate Server key.
+./build-key-server server
+
+cd - 1> /dev/null
 
 # Uncomment redirect-gateway line.
 sed -i '/;push "redirect-gateway def1 bypass-dhcp"/s/^;//g' /etc/openvpn/server.conf
