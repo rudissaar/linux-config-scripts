@@ -80,6 +80,9 @@ cp /etc/openvpn/easy-rsa/keys/ca.crt /etc/openvpn/
 rm /etc/openvpn/easy-rsa/keys/server.csr 2> /dev/null
 mv /etc/openvpn/easy-rsa/keys/server.* /etc/openvpn/
 
+# Genetate TLS Auth key.
+openvpn --genkey --secret /etc/openvpn/ta.key
+
 cd - 1> /dev/null
 
 # Uncomment redirect-gateway line.
