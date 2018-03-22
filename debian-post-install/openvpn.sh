@@ -36,7 +36,7 @@ cp \
     /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz \
     /etc/openvpn/server.conf.gz
 
-gunzip /etc/openvpn/server.conf.gz
+gunzip -f /etc/openvpn/server.conf.gz
 
 # Copy Easy RSA files to OpenVPN directory.
 if [[ ! -d /etc/openvpn/easy-rsa ]]; then
@@ -73,9 +73,12 @@ mv /etc/openvpn/easy-rsa/keys/dh*.pem /etc/openvpn/
 
 # Generate CA key.
 ./build-ca
+cp /etc/openvpn/easy-rsa/keys/ca.crt /etc/openvpn/
 
 # Generate Server key.
 ./build-key-server server
+rm /etc/openvpn/easy-rsa/keys/server.csr 2> /dev/null
+mv /etc/openvpn/easy-rsa/keys/server.* /etc/openvpn/
 
 cd - 1> /dev/null
 
@@ -147,6 +150,10 @@ if [[ "${RUN_UFW_NAT}" = '1' ]]; then
         sed -i '0,/^$/s/^$/'"${BLOCK}"'/' /etc/ufw/before.rules
     fi
 fi
+
+# Enable OpenVPN service.
+systemctl enable openvpn.service
+systemctl start openvpn.service
 
 # Block that either gives information about firewall rules that you should apply, or just applies them.
 if [[ "${RUN_UFW_RULES}" = '1' ]]; then
