@@ -12,6 +12,7 @@ NAMESERVER_2='8.8.4.4'
 LZO_COMPRESSION=1
 
 EDIT_VARS=0
+NON_INTERACTIVE=0
 
 RUN_UFW_FORWARD_POLICY=1
 RUN_UFW_NAT=1
@@ -45,6 +46,20 @@ fi
 
 cp -r /usr/share/easy-rsa/* /etc/openvpn/easy-rsa/
 
+if [[ "${NON_INTERACTIVE}" = '1' ]]; then
+    # Create Non-Interactive script to generate CA key.
+    if [[ ! -f /etc/openvpn/easy-rsa/build-ca-auto ]]; then
+        cp /etc/openvpn/easy-rsa/build-ca /etc/openvpn/easy-rsa/build-ca-auto
+        sed -i 's/ --interact//g' /etc/openvpn/easy-rsa/build-ca-auto
+    fi
+
+    # Create Non-Interactive script to generate Server key.
+    if [[ ! -f /etc/openvpn/easy-rsa/build-key-server-auto ]]; then
+        cp /etc/openvpn/easy-rsa/build-key-server /etc/openvpn/easy-rsa/build-key-server-auto
+        sed -i 's/ --interact//g' /etc/openvpn/easy-rsa/build-key-server-auto
+    fi
+fi
+
 # Make sure file /etc/openvpn/easy-rsa/openssl.cnf exists.
 if [[ ! -f /etc/openvpn/easy-rsa/openssl.cnf ]]; then
     OPENSSL_CONFIG="$(ls /etc/openvpn/easy-rsa/openssl-*.cnf | sort | tail -n 1)"
@@ -72,11 +87,21 @@ touch /etc/openvpn/easy-rsa/keys/index.txt.attr
 mv /etc/openvpn/easy-rsa/keys/dh*.pem /etc/openvpn/
 
 # Generate CA key.
-./build-ca
+if [[ "${NON_INTERACTIVE}" = '1' ]]; then
+    ./build-ca-auto
+else
+    ./build-ca
+fi
+
 cp /etc/openvpn/easy-rsa/keys/ca.crt /etc/openvpn/
 
 # Generate Server key.
-./build-key-server server
+if [[ "${NON_INTERACTIVE}" = '1' ]]; then
+    ./build-key-server-auto server
+else
+    ./build-key-server server
+fi
+
 rm /etc/openvpn/easy-rsa/keys/server.csr 2> /dev/null
 mv /etc/openvpn/easy-rsa/keys/server.* /etc/openvpn/
 
@@ -156,7 +181,7 @@ fi
 
 # Enable OpenVPN service.
 systemctl enable openvpn.service
-systemctl start openvpn.service
+systemctl restart openvpn.service
 
 # Block that either gives information about firewall rules that you should apply, or just applies them.
 if [[ "${RUN_UFW_RULES}" = '1' ]]; then
