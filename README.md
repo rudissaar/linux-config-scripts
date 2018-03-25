@@ -1,19 +1,19 @@
-# linux-config-scripts
+# Linux Config Scripts
 
 The main purpose of this repository is to contain Linux shell scripts
-that can be triggered on system without needing to have bunch of dependencie.
+that can be triggered on system without needing to have a bunch of dependencies.
 Only requirements that you should have is `bash` and `wget` command
 and in most cases internet connection.
 
 ### Examples:
-To execute script that doesn't require any interaction.
+You can use the following syntax to execute scripts:
 ```
-wget -O - https://raw.../linux-config-scripts/master/debian-post-install/vim.sh | bash
+bash <(wget -O - https://.../linux-config-scripts/master/debian-post-install/openvpn.sh)
 ```
 
-If script does require interaction, you should this syntax, it's recommend syntax to use for both of them:
+You can also use this syntax to execute a script that doesn't require any interaction:
 ```
-bash <(wget -O - https://raw.githubusercontent.com/rudissaar/linux-config-scripts/master/debian-post-install/openvpn.sh
+wget -O - https://.../linux-config-scripts/master/debian-post-install/vim.sh | bash
 ```
 
 You should also be able to call them from `chef`, if you are planning to run scripts on multiple servers.
