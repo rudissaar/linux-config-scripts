@@ -31,7 +31,7 @@ apt-get install -y openvpn easy-rsa openssl ufw net-tools sed
 
 # Make sure /etc/openvpn directory exists.
 if [[ ! -d /etc/openvpn ]]; then
-    mkidr /etc/openvpn
+    mkdir /etc/openvpn
 fi
 
 # Remove useless folders if they exist and are empty.
