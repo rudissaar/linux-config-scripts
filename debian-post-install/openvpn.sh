@@ -2,6 +2,7 @@
 
 GATEWAY_INTERFACE=''
 OPENVPN_NETWORK='10.8.0.0'
+OPENVPN_NETMASK='255.255.255.0'
 OPENVPN_PROTOCOL='udp'
 OPENVPN_PORT=1194
 
@@ -27,6 +28,11 @@ fi
 # Install packages.
 apt-get update -y
 apt-get install -y openvpn easy-rsa openssl ufw net-tools sed
+
+# Make sure /etc/openvpn directory exists.
+if [[ ! -d /etc/openvpn ]]; then
+    mkidr /etc/openvpn
+fi
 
 # Remove useless folders if they exist and are empty.
 rmdir /etc/openvpn/server 1> /dev/null 2>&1
@@ -109,6 +115,16 @@ mv /etc/openvpn/easy-rsa/keys/server.* /etc/openvpn/
 openvpn --genkey --secret /etc/openvpn/ta.key
 
 cd - 1> /dev/null
+
+# Change Network if you specified new one.
+if [[ "${OPENVPN_NETWORK}" != '10.8.0.0' ]]; then
+    sed -i '/^server 10.8.0.0/s/10.8.0.0/'${OPENVPN_NETWORK}'/' /etc/openvpn/server.conf
+fi
+
+# Change Netmask if you specified new one.
+if [[ "${OPENVPN_NETMASK}" != '255.255.255.0' ]]; then
+    sed -i '/^server '${OPENVPN_NETWORK}' 255.255.255.0/s/ 255.255.255.0/ '${OPENVPN_NETMASK}'/' /etc/openvpn/server.conf
+fi
 
 # Uncomment redirect-gateway line.
 sed -i '/;push "redirect-gateway def1 bypass-dhcp"/s/^;//g' /etc/openvpn/server.conf
