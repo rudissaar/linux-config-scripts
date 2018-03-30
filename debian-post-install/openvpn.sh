@@ -10,6 +10,7 @@ USE_SAME_NAMESERVERS_AS_HOST=0
 NAMESERVER_1='8.8.8.8'
 NAMESERVER_2='8.8.4.4'
 
+CRL_VERIFY=0
 LZO_COMPRESSION=1
 
 EDIT_VARS=0
@@ -31,7 +32,7 @@ apt-get install -y openvpn easy-rsa openssl ufw net-tools sed
 
 # Make sure /etc/openvpn directory exists.
 if [[ ! -d /etc/openvpn ]]; then
-    mkidr /etc/openvpn
+    mkdir /etc/openvpn
 fi
 
 # Remove useless folders if they exist and are empty.
@@ -63,6 +64,14 @@ if [[ "${NON_INTERACTIVE}" = '1' ]]; then
     if [[ ! -f /etc/openvpn/easy-rsa/build-key-server-auto ]]; then
         cp /etc/openvpn/easy-rsa/build-key-server /etc/openvpn/easy-rsa/build-key-server-auto
         sed -i 's/ --interact//g' /etc/openvpn/easy-rsa/build-key-server-auto
+    fi
+fi
+
+# Create extra EasyRSA script to generate new crl.pem file.
+if [[ "${CRL_VERIFY}" = '1' ]]; then
+    if [[ ! -f /etc/openvpn/easy-rsa/init-crl ]]; then
+        cp /etc/openvpn/easy-rsa/revoke-full /etc/openvpn/easy-rsa/init-crl
+        sed -i '/^if \[ \$# -ne 1 \]; then$/,+4d' /etc/openvpn/easy-rsa/init-crl
     fi
 fi
 
@@ -114,6 +123,14 @@ mv /etc/openvpn/easy-rsa/keys/server.* /etc/openvpn/
 # Genetate TLS Auth key.
 openvpn --genkey --secret /etc/openvpn/ta.key
 
+# Generate crl.pem file.
+if [[ "${CRL_VERIFY}" = '1' ]]; then
+    if [[ ! -f /etc/openvpn/easy-rsa/keys/crl.pem ]]; then
+        /etc/openvpn/easy-rsa/init-crl 2> /dev/null
+        ln -sf /etc/openvpn/easy-rsa/keys/crl.pem /etc/openvpn/crl.pem
+    fi
+fi
+
 cd - 1> /dev/null
 
 # Change Network if you specified new one.
@@ -146,6 +163,15 @@ fi
 # Uncomment and set DNS servers.
 sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS '${NAMESERVER_2}'"/' /etc/openvpn/server.conf
 sed -i -r '0,/dhcp-option DNS '${NAMESERVER_2}'/s/'${NAMESERVER_2}'/'${NAMESERVER_1}'/' /etc/openvpn/server.conf
+
+if [[ "${CRL_VERIFY}" = '1' ]]; then
+    grep -Fq 'crl-verify crl.pem' /etc/openvpn/server.conf
+
+    if [[ "${?}" != '0' ]]; then
+        echo -e "\n\n# Use certificate revocation list." >> /etc/openvpn/server.conf
+        echo 'crl-verify crl.pem' >> /etc/openvpn/server.conf
+    fi
+fi
 
 if [[ "${LZO_COMPRESSION}" = '1' ]]; then
     sed -i '/;comp-lzo/s/^;//g' /etc/openvpn/server.conf
