@@ -133,6 +133,11 @@ fi
 
 cd - 1> /dev/null
 
+# Change Port if you specified new one.
+if [[ "${OPENVPN_PORT}" != '1194' ]]; then
+    sed -i '/^port 1194/s/1194/'${OPENVPN_PORT}'/' /etc/openvpn/server.conf
+fi
+
 # Change Network if you specified new one.
 if [[ "${OPENVPN_NETWORK}" != '10.8.0.0' ]]; then
     sed -i '/^server 10.8.0.0/s/10.8.0.0/'${OPENVPN_NETWORK}'/' /etc/openvpn/server.conf
