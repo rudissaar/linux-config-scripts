@@ -11,10 +11,10 @@ fi
 
 grep -Fxq 'HISTFILE=/dev/null' /etc/profile
 
-if [[ "${?}" = '0' ]]; then
+if [[ "${?}" = '1' ]]; then
     grep -Fxq 'HISTSIZE' /etc/profile
 
-    if [[ "${?}" = '1' ]]; then
+    if [[ "${?}" = '0' ]]; then
         sed -i "/HISTSIZE/a export HISTFILE=/dev/null\n" /etc/profile
     else
         echo -e "\nexport HISTFILE=/dev/null" >> /etc/profile
