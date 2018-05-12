@@ -81,7 +81,7 @@ if [[ ! -f /etc/openvpn/easy-rsa/openssl.cnf ]]; then
     ln -sf "${OPENSSL_CONFIG}" /etc/openvpn/easy-rsa/openssl.cnf
 fi
 
-# Makse sure keys directory exist.
+# Makes sure keys directory exist.
 if [[ ! -d /etc/openvpn/easy-rsa/keys ]]; then
     mkdir /etc/openvpn/easy-rsa/keys
 fi
@@ -120,7 +120,7 @@ fi
 rm /etc/openvpn/easy-rsa/keys/server.csr 2> /dev/null
 mv /etc/openvpn/easy-rsa/keys/server.* /etc/openvpn/
 
-# Genetate TLS Auth key.
+# Generate TLS Auth key.
 openvpn --genkey --secret /etc/openvpn/ta.key
 
 # Generate crl.pem file.
@@ -169,6 +169,7 @@ fi
 sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS '${NAMESERVER_2}'"/' /etc/openvpn/server.conf
 sed -i -r '0,/dhcp-option DNS '${NAMESERVER_2}'/s/'${NAMESERVER_2}'/'${NAMESERVER_1}'/' /etc/openvpn/server.conf
 
+# Enable CRL (Certificate Revocation List).
 if [[ "${CRL_VERIFY}" = '1' ]]; then
     grep -Fq 'crl-verify crl.pem' /etc/openvpn/server.conf
 
@@ -178,6 +179,7 @@ if [[ "${CRL_VERIFY}" = '1' ]]; then
     fi
 fi
 
+# Enable LZO compression.
 if [[ "${LZO_COMPRESSION}" = '1' ]]; then
     sed -i '/;comp-lzo/s/^;//g' /etc/openvpn/server.conf
 fi
@@ -245,3 +247,4 @@ else
     echo 'ufw allow proto '${OPENVPN_PROTOCOL}' to 0.0.0.0/0 port '${OPENVPN_PORT}
     echo 'ufw enable'
 fi
+
