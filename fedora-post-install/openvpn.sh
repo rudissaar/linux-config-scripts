@@ -56,7 +56,7 @@ touch "${OPENVPN_SERVER_DIR}/easy-rsa/pki/index.txt.attr"
 
 # Generate new Diffie-Hellman key.
 ./easyrsa gen-dh
-mv "${OPENVPN_SERVER_DIR}/easy-rsa/pki/dh.pem" "${OPENVPN_SERVER_DIR}/dh2048.pem"
+mv "${OPENVPN_SERVER_DIR}/easy-rsa/pki/dh.pem" "${OPENVPN_SERVER_DIR}"
 
 # Generate CA key.
 echo | ./easyrsa build-ca nopass
@@ -78,6 +78,9 @@ fi
 openvpn --genkey --secret "${OPENVPN_SERVER_DIR}/ta.key"
 
 cd - 1> /dev/null
+
+# Change name of the Diffie-Hellman key file.
+sed -i 's/^dh [^.]*\.pem$/dh dh.pem/g' "${OPENVPN_SERVER_DIR}/server.conf"
 
 # Change Port if you specified new one.
 if [[ "${OPENVPN_PORT}" != '1194' ]]; then
