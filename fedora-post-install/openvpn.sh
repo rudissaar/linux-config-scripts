@@ -26,7 +26,7 @@ fi
 
 # Install packages.
 dnf update -y
-dnf install -y openvpn easy-rsa openssl net-tools sed
+dnf install -y firewalld openvpn easy-rsa openssl net-tools sed
 
 # Make sure OpenVPN server directory exists.
 if [[ ! -d "${OPENVPN_SERVER_DIR}" ]]; then
@@ -149,6 +149,9 @@ fi
 
 # Active firewall rules.
 if [[ "${RUN_FIREWALL_RULES}" = '1' ]]; then
+    systemctl enable firewalld
+    systemctl restart firewalld
+
     if [[ -z "${GATEWAY_INTERFACE}" ]]; then
         GATEWAY_INTERFACE="$(echo $(route | grep default) | cut -d ' ' -f 8)"
     else
@@ -156,11 +159,15 @@ if [[ "${RUN_FIREWALL_RULES}" = '1' ]]; then
         exit 1
     fi
 
+    firewall-cmd --zone=public --change-interface=${GATEWAY_INTERFACE}
+    firewall-cmd --add-masquerade
     firewall-cmd --add-port=${OPENVPN_PORT}/${OPENVPN_PROTOCOL}
     firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s ${OPENVPN_NETWORK}/${OPENVPN_NETMASK} -o ${GATEWAY_INTERFACE} -j MASQUERADE
     firewall-cmd --runtime-to-permanent
 else
     echo '> In order to complete installation you have to apply firewall rules:'
+    echo "firewall-cmd --zone=public --change-interface=${GATEWAY_INTERFACE}"
+    echo 'firewall-cmd --add-masquerade'
     echo "firewall-cmd --add-port=${OPENVPN_PORT}/${OPENVPN_PROTOCOL}"
     echo "firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s ${OPENVPN_NETWORK}/${OPENVPN_NETMASK} -o ${GATEWAY_INTERFACE} -j MASQUERADE"
     echo 'firewall-cmd --runtime-to-permanent'
