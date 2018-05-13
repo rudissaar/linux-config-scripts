@@ -18,7 +18,6 @@ LZO_COMPRESSION=1
 EDIT_VARS=0
 
 RUN_FIREWALL_RULES=0
-RUN_FIREWALL_RULES_DEFAULT_SSH=1
 
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
@@ -148,8 +147,26 @@ if [[ "${?}" != '0' ]]; then
     echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 fi
 
+# Active firewall rules.
+if [[ "${RUN_FIREWALL_RULES}" = '1' ]]; then
+    if [[ -z "${GATEWAY_INTERFACE}" ]]; then
+        GATEWAY_INTERFACE="$(echo $(route | grep default) | cut -d ' ' -f 8)"
+    else
+        echo '> Unable to identify default Network Interface, please define it manually.'
+        exit 1
+    fi
+
+    firewall-cmd --add-port=${OPENVPN_PORT}/${OPENVPN_PROTOCOL}
+    firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s ${OPENVPN_NETWORK}/${OPENVPN_NETMASK} -o ${GATEWAY_INTERFACE} -j MASQUERADE
+    firewall-cmd --runtime-to-permanent
+else
+    echo '> In order to complete installation you have to apply firewall rules:'
+    echo "firewall-cmd --add-port=${OPENVPN_PORT}/${OPENVPN_PROTOCOL}"
+    echo "firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s ${OPENVPN_NETWORK}/${OPENVPN_NETMASK} -o ${GATEWAY_INTERFACE} -j MASQUERADE"
+    echo 'firewall-cmd --runtime-to-permanent'
+fi
+
 # Enable OpenVPN service.
-#ln -s /lib/systemd/system/openvpn-server\@.service /etc/systemd/system/multi-user.target.wants/openvpn-server\@server.service
-#systemctl enable openvpn-server@server.service
-#systemctl start openvpn-server@server.service
+systemctl enable openvpn-server@server.service
+systemctl restart openvpn-server@server.service
 
