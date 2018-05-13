@@ -145,7 +145,9 @@ fi
 
 # Change Netmask if you specified new one.
 if [[ "${OPENVPN_NETMASK}" != '255.255.255.0' ]]; then
-    sed -i '/^server '${OPENVPN_NETWORK}' 255.255.255.0/s/ 255.255.255.0/ '${OPENVPN_NETMASK}'/' /etc/openvpn/server.conf
+    sed -i \
+        '/^server '${OPENVPN_NETWORK}' 255.255.255.0/s/ 255.255.255.0/ '${OPENVPN_NETMASK}'/' \
+	/etc/openvpn/server.conf
 fi
 
 # Uncomment redirect-gateway line.
@@ -166,8 +168,13 @@ if [[ "${USE_SAME_NAMESERVERS_AS_HOST}" = '1' ]]; then
 fi
 
 # Uncomment and set DNS servers.
-sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS '${NAMESERVER_2}'"/' /etc/openvpn/server.conf
-sed -i -r '0,/dhcp-option DNS '${NAMESERVER_2}'/s/'${NAMESERVER_2}'/'${NAMESERVER_1}'/' /etc/openvpn/server.conf
+sed -i \
+    's/^;push "dhcp-option DNS .*/push "dhcp-option DNS '${NAMESERVER_2}'"/' \
+    /etc/openvpn/server.conf
+
+sed -i -r \
+    '0,/dhcp-option DNS '${NAMESERVER_2}'/s/'${NAMESERVER_2}'/'${NAMESERVER_1}'/' \
+    /etc/openvpn/server.conf
 
 # Enable CRL (Certificate Revocation List).
 if [[ "${CRL_VERIFY}" = '1' ]]; then
@@ -213,9 +220,11 @@ if [[ "${RUN_UFW_NAT}" = '1' ]]; then
     if [[ "${?}" != '0' ]]; then
         if [[ -z "${GATEWAY_INTERFACE}" ]]; then
             GATEWAY_INTERFACE="$(echo $(route | grep default) | cut -d ' ' -f 8)"
-        else
-            echo '> Unable to identify default Network Interface, please define it manually.'
-            exit 1
+
+            if [[ -z "${GATEWAY_INTERFACE}" ]]; then
+                echo '> Unable to identify default Network Interface, please define it manually.'
+                exit 1
+            fi
         fi
 
         BLOCK="\\n\# NAT rules for OpenVPN server.\\n"
