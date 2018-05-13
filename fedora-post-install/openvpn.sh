@@ -26,7 +26,7 @@ fi
 
 # Install packages.
 dnf update -y
-dnf install -y firewalld openvpn easy-rsa openssl net-tools sed
+dnf install -y openvpn firewalld easy-rsa openssl net-tools sed
 
 # Make sure OpenVPN server directory exists.
 if [[ ! -d "${OPENVPN_SERVER_DIR}" ]]; then
@@ -70,7 +70,7 @@ mv "${OPENVPN_SERVER_DIR}/easy-rsa/pki/private/server.key" "${OPENVPN_SERVER_DIR
 # Generate crl.pem file.
 if [[ "${CRL_VERIFY}" = '1' ]]; then
     if [[ ! -f "${OPENVPN_SERVER_DIR}/easy-rsa/pki/crl.pem" ]]; then
-	./easyrsa gen-crl
+        ./easyrsa gen-crl
     fi
 fi
 
@@ -91,7 +91,9 @@ fi
 
 # Change Netmask if you specified new one.
 if [[ "${OPENVPN_NETMASK}" != '255.255.255.0' ]]; then
-    sed -i '/^server '${OPENVPN_NETWORK}' 255.255.255.0/s/ 255.255.255.0/ '${OPENVPN_NETMASK}'/' "${OPENVPN_SERVER_DIR}/server.conf"
+    sed -i \
+       '/^server '${OPENVPN_NETWORK}' 255.255.255.0/s/ 255.255.255.0/ '${OPENVPN_NETMASK}'/' \
+        "${OPENVPN_SERVER_DIR}/server.conf"
 fi
 
 # Uncomment redirect-gateway line.
@@ -112,16 +114,26 @@ if [[ "${USE_SAME_NAMESERVERS_AS_HOST}" = '1' ]]; then
 fi
 
 # Uncomment and set DNS servers.
-sed -i 's/^;push "dhcp-option DNS .*/push "dhcp-option DNS '${NAMESERVER_2}'"/' "${OPENVPN_SERVER_DIR}/server.conf"
-sed -i -r '0,/dhcp-option DNS '${NAMESERVER_2}'/s/'${NAMESERVER_2}'/'${NAMESERVER_1}'/' "${OPENVPN_SERVER_DIR}/server.conf"
+sed -i \
+    's/^;push "dhcp-option DNS .*/push "dhcp-option DNS '${NAMESERVER_2}'"/' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
+
+sed -i -r \
+    '0,/dhcp-option DNS '${NAMESERVER_2}'/s/'${NAMESERVER_2}'/'${NAMESERVER_1}'/' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
 
 # Enable CRL (Certificate Revocation List).
 if [[ "${CRL_VERIFY}" = '1' ]]; then
     grep -Fq 'crl-verify' "${OPENVPN_SERVER_DIR}/server.conf"
 
     if [[ "${?}" != '0' ]]; then
-        echo -e "\n\n# Use certificate revocation list." >> "${OPENVPN_SERVER_DIR}/server.conf"
-        echo "crl-verify ${OPENVPN_SERVER_DIR}/easy-rsa/pki/crl.pem" >> "${OPENVPN_SERVER_DIR}/server.conf"
+        echo -e \
+            "\n\n# Use certificate revocation list." \
+            >> "${OPENVPN_SERVER_DIR}/server.conf"
+
+        echo \
+            "crl-verify ${OPENVPN_SERVER_DIR}/easy-rsa/pki/crl.pem" \
+            >> "${OPENVPN_SERVER_DIR}/server.conf"
     fi
 fi
 
@@ -147,29 +159,39 @@ if [[ "${?}" != '0' ]]; then
     echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 fi
 
+# Identify default network interface.
+if [[ -z "${GATEWAY_INTERFACE}" ]]; then
+    GATEWAY_INTERFACE="$(echo $(route | grep default) | cut -d ' ' -f 8)"
+
+    if [[ -z "${GATEWAY_INTERFACE}" ]]; then
+        echo '> Unable to identify default Network Interface, please define it manually.'
+        exit 1
+    fi
+fi
+
 # Active firewall rules.
 if [[ "${RUN_FIREWALL_RULES}" = '1' ]]; then
     systemctl enable firewalld
     systemctl restart firewalld
 
-    if [[ -z "${GATEWAY_INTERFACE}" ]]; then
-        GATEWAY_INTERFACE="$(echo $(route | grep default) | cut -d ' ' -f 8)"
-    else
-        echo '> Unable to identify default Network Interface, please define it manually.'
-        exit 1
-    fi
-
     firewall-cmd --zone=public --change-interface=${GATEWAY_INTERFACE}
     firewall-cmd --add-masquerade
     firewall-cmd --add-port=${OPENVPN_PORT}/${OPENVPN_PROTOCOL}
-    firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s ${OPENVPN_NETWORK}/${OPENVPN_NETMASK} -o ${GATEWAY_INTERFACE} -j MASQUERADE
+
+    firewall-cmd --direct --passthrough ipv4 \
+        -t nat -A POSTROUTING \
+        -s ${OPENVPN_NETWORK}/${OPENVPN_NETMASK} \
+        -o ${GATEWAY_INTERFACE} -j MASQUERADE
+
     firewall-cmd --runtime-to-permanent
 else
     echo '> In order to complete installation you have to apply firewall rules:'
     echo "firewall-cmd --zone=public --change-interface=${GATEWAY_INTERFACE}"
     echo 'firewall-cmd --add-masquerade'
     echo "firewall-cmd --add-port=${OPENVPN_PORT}/${OPENVPN_PROTOCOL}"
-    echo "firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s ${OPENVPN_NETWORK}/${OPENVPN_NETMASK} -o ${GATEWAY_INTERFACE} -j MASQUERADE"
+    echo -n "firewall-cmd --direct --passthrough ipv4 "
+    echo -n "-t nat -A POSTROUTING -s ${OPENVPN_NETWORK}/${OPENVPN_NETMASK} "
+    echo "-o ${GATEWAY_INTERFACE} -j MASQUERADE"
     echo 'firewall-cmd --runtime-to-permanent'
 fi
 
