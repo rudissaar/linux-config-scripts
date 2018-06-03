@@ -19,4 +19,3 @@ dnf autoremove -y
 
 # Remove repository's cache.
 dnf clean all
-
