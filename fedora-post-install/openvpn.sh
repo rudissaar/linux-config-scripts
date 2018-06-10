@@ -19,6 +19,7 @@ EDIT_VARS=0
 
 RUN_FIREWALL_RULES=0
 
+# You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
     exit 1
