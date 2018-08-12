@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SHARE_DIR='/share'
+SHARE_DIR='/data'
 SHARE_HOSTS='*'
 SHARE_MODE='rw'
 
@@ -25,7 +25,7 @@ if [[ "${?}" == '0' ]]; then
 fi
 
 # Install packages.
-yum install -y \
+dnf install -y \
     nfs-utils \
     nfs4-acl-tools
 
@@ -51,7 +51,7 @@ exportfs -avr
 # Active firewall rules.
 if [[ "${RUN_FIREWALL_RULES}" = '1' ]]; then
     # Make sure firewalld is installed.
-    yum install -y firewalld
+    dnf install -y firewalld
 
     # Enable Firewalld service.
     systemctl enable firewalld
