@@ -8,7 +8,7 @@ if [[ "${UID}" != '0' ]]; then
 fi
 
 # Install packages.
-apt-get update -y
+apt-get update
 apt-get install -y \
     vim
 
@@ -18,7 +18,6 @@ grep -Fq 'alias vi=' /etc/bash.bashrc
 if [[ "${?}" != '0' ]]; then
     echo >> /etc/bash.bashrc
     echo "alias vi='vim'" >> /etc/bash.bashrc
-    exec bash
 fi
 
 if [[ ! -f /etc/skel/.vimrc ]]; then
