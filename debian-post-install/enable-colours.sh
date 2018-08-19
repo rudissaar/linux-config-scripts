@@ -39,8 +39,4 @@ if [[ "${?}" != '0' ]]; then
     echo "alias grep='grep --color=auto'" >> /etc/bash.bashrc
 fi
 
-# Source bashrc files.
-exec bash
-
 echo '> Finished.'
-
