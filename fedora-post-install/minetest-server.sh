@@ -3,6 +3,7 @@
 MINETEST_PORT=30000
 
 MINETEST_MOD_MOREBLOCKS=0
+MINETEST_MOD_TORCHES=0
 
 RUN_FIREWALL_RULES=0
 
@@ -20,13 +21,13 @@ GET_LATEST_RELEASE () {
 
 # Install packages.
 dnf install -y \
-	minetest \
-	minetest-server \
+    minetest \
+    minetest-server \
     curl \
     wget \
     jq
 
-# Install mods
+# Install mods.
 if [[ "${MINETEST_MOD_MOREBLOCKS}" == '1' ]]; then
     MOD_REPO='minetest-mods/moreblocks'
     GET_LATEST_RELEASE "${MOD_REPO}"
@@ -40,6 +41,23 @@ if [[ "${MINETEST_MOD_MOREBLOCKS}" == '1' ]]; then
         fi
 
         cp -r "/tmp/$(echo ${MOD_REPO} | tr '/' '-')-"*/* /usr/share/minetest/games/minetest_game/mods/moreblocks/
+        rm -rf "/tmp/$(echo ${MOD_REPO} | tr '/' '-')"*
+    fi
+fi
+
+if [[ "${MINETEST_MOD_TORCHES}" == '1' ]]; then
+    MOD_REPO='minetest-mods/torches'
+    GET_LATEST_RELEASE "${MOD_REPO}"
+    TARBALL="/tmp/$(echo ${MOD_REPO} | tr '/' '-').tar.gz"
+
+    if [[ -f "${TARBALL}" ]]; then
+        tar -xf "${TARBALL}" -C '/tmp'
+
+        if [[ ! -d '/usr/share/minetest/games/minetest_game/mods/torches' ]]; then
+            mkdir -p '/usr/share/minetest/games/minetest_game/mods/torches'
+        fi
+
+        cp -r "/tmp/$(echo ${MOD_REPO} | tr '/' '-')-"*/* /usr/share/minetest/games/minetest_game/mods/torches/
         rm -rf "/tmp/$(echo ${MOD_REPO} | tr '/' '-')"*
     fi
 fi
