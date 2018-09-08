@@ -10,6 +10,7 @@ MINETEST_MOD_TORCHES=0
 MINETEST_MOD_PIPEWORKS=0
 MINETEST_MOD_NETHER=0
 MINETEST_MOD_MESECONS=0
+MINETEST_MOD_COMPUTER=0
 
 RUN_FIREWALL_RULES=0
 
@@ -89,6 +90,10 @@ fi
 
 if [[ "${MINETEST_MOD_MESECONS}" == '1' ]]; then
     INSTALL_COMMON_MOD mesecons
+fi
+
+if [[ "${MINETEST_MOD_COMPUTER}" == '1' ]]; then
+    INSTALL_COMMON_MOD computer
 fi
 
 # Change Port if you specified new one.
