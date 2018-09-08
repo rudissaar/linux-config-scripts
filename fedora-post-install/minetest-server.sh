@@ -11,6 +11,8 @@ MINETEST_MOD_PIPEWORKS=0
 MINETEST_MOD_NETHER=0
 MINETEST_MOD_MESECONS=0
 MINETEST_MOD_COMPUTER=0
+MINETEST_MOD_MYDOORS=0
+MINETEST_MOD_LIGHTNING=0
 
 RUN_FIREWALL_RULES=0
 
@@ -94,6 +96,14 @@ fi
 
 if [[ "${MINETEST_MOD_COMPUTER}" == '1' ]]; then
     INSTALL_COMMON_MOD computer
+fi
+
+if [[ "${MINETEST_MOD_MYDOORS}" == '1' ]]; then
+    INSTALL_COMMON_MOD mydoors
+fi
+
+if [[ "${MINETEST_MOD_LIGHTNING}" == '1' ]]; then
+    INSTALL_COMMON_MOD lightning
 fi
 
 # Change Port if you specified new one.
