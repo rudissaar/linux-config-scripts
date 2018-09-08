@@ -7,6 +7,9 @@ MINETEST_PORT=30000
 MINETEST_MOD_MOREBLOCKS=0
 MINETEST_MOD_MOREORES=0
 MINETEST_MOD_TORCHES=0
+MINETEST_MOD_PIPEWORKS=0
+MINETEST_MOD_NETHER=0
+MINETEST_MOD_MESECONS=0
 
 RUN_FIREWALL_RULES=0
 
@@ -74,6 +77,18 @@ fi
 
 if [[ "${MINETEST_MOD_TORCHES}" == '1' ]]; then
     INSTALL_COMMON_MOD torches
+fi
+
+if [[ "${MINETEST_MOD_PIPEWORKS}" == '1' ]]; then
+    INSTALL_COMMON_MOD pipeworks
+fi
+
+if [[ "${MINETEST_MOD_NETHER}" == '1' ]]; then
+    INSTALL_COMMON_MOD nether
+fi
+
+if [[ "${MINETEST_MOD_MESECONS}" == '1' ]]; then
+    INSTALL_COMMON_MOD mesecons
 fi
 
 # Change Port if you specified new one.
