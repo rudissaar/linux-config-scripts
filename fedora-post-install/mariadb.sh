@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# This script installs MariaDB server on your machine.
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -6,11 +7,10 @@ if [[ "${UID}" != '0' ]]; then
     exit 1
 fi
 
-# Upgrade packages.
-dnf update -y
-
 # Install mariadb.
-dnf install -y mariadb mariadb-server
+dnf install -y \
+    mariadb \
+    mariadb-server
 
 # Enable it.
 systemctl enable mariadb

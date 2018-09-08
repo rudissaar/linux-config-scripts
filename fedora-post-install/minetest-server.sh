@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
+# Script that simplifies installing Minetest server on Fedora GNU/Linux.
+# This script also provides you with options to install latest mods from Github.
 
 MINETEST_PORT=30000
 
 MINETEST_MOD_MOREBLOCKS=0
+MINETEST_MOD_MOREORES=0
 MINETEST_MOD_TORCHES=0
 
 RUN_FIREWALL_RULES=0
@@ -41,6 +44,23 @@ if [[ "${MINETEST_MOD_MOREBLOCKS}" == '1' ]]; then
         fi
 
         cp -r "/tmp/$(echo ${MOD_REPO} | tr '/' '-')-"*/* /usr/share/minetest/games/minetest_game/mods/moreblocks/
+        rm -rf "/tmp/$(echo ${MOD_REPO} | tr '/' '-')"*
+    fi
+fi
+
+if [[ "${MINETEST_MOD_MOREORES}" == '1' ]]; then
+    MOD_REPO='minetest-mods/moreores'
+    GET_LATEST_RELEASE "${MOD_REPO}"
+    TARBALL="/tmp/$(echo ${MOD_REPO} | tr '/' '-').tar.gz"
+
+    if [[ -f "${TARBALL}" ]]; then
+        tar -xf "${TARBALL}" -C '/tmp'
+
+        if [[ ! -d '/usr/share/minetest/games/minetest_game/mods/moreores' ]]; then
+            mkdir -p '/usr/share/minetest/games/minetest_game/mods/moreores'
+        fi
+
+        cp -r "/tmp/$(echo ${MOD_REPO} | tr '/' '-')-"*/* /usr/share/minetest/games/minetest_game/mods/moreores/
         rm -rf "/tmp/$(echo ${MOD_REPO} | tr '/' '-')"*
     fi
 fi
@@ -84,5 +104,5 @@ else
 fi
 
 # Enable Minetest service.
-systemctl start minetest@default
+systemctl restart minetest@default
 systemctl enable minetest@default
