@@ -16,10 +16,43 @@ if [[ "${UID}" != '0' ]]; then
     exit 1
 fi
 
+MOD_PAGE_EXISTS () {
+    STATUS_CODE="$(curl -s -o /dev/null -w "%{http_code}" https://api.github.com/repos/${1}/tags)"
+
+    if [[ "${STATUS_CODE}" == '200' ]]; then
+        echo '1'
+    else
+        echo '0'
+    fi
+}
+
 GET_LATEST_RELEASE () {
     URL="$(curl -s "https://api.github.com/repos/${1}/tags" | jq .[0].tarball_url | tr -d '"')"
     DESTINATION="/tmp/$(echo "${1}" | tr '/' '-').tar.gz"
     wget "${URL}" -O "${DESTINATION}"
+}
+
+INSTALL_COMMON_MOD () {
+    MOD_REPO="minetest-mods/${1}"
+    INSTALLABLE="$(MOD_PAGE_EXISTS ${MOD_REPO})"
+
+    if [[ "${INSTALLABLE}" == '1' ]]; then
+        GET_LATEST_RELEASE "${MOD_REPO}"
+        TARBALL="/tmp/$(echo ${MOD_REPO} | tr '/' '-').tar.gz"
+
+        if [[ -f "${TARBALL}" ]]; then
+            tar -xf "${TARBALL}" -C '/tmp'
+
+            if [[ ! -d "/usr/share/minetest/games/minetest_game/mods/${1}" ]]; then
+                mkdir -p "/usr/share/minetest/games/minetest_game/mods/${1}"
+            fi
+
+            cp -r "/tmp/$(echo ${MOD_REPO} | tr '/' '-')-"*/* "/usr/share/minetest/games/minetest_game/mods/${1}/"
+            rm -rf "/tmp/$(echo ${MOD_REPO} | tr '/' '-')"*
+        fi
+    else
+        echo "> Unable to install Minetest Mod: '${1}', skipping."
+    fi
 }
 
 # Install packages.
@@ -32,54 +65,15 @@ dnf install -y \
 
 # Install mods.
 if [[ "${MINETEST_MOD_MOREBLOCKS}" == '1' ]]; then
-    MOD_REPO='minetest-mods/moreblocks'
-    GET_LATEST_RELEASE "${MOD_REPO}"
-    TARBALL="/tmp/$(echo ${MOD_REPO} | tr '/' '-').tar.gz"
-
-    if [[ -f "${TARBALL}" ]]; then
-        tar -xf "${TARBALL}" -C '/tmp'
-
-        if [[ ! -d '/usr/share/minetest/games/minetest_game/mods/moreblocks' ]]; then
-            mkdir -p '/usr/share/minetest/games/minetest_game/mods/moreblocks'
-        fi
-
-        cp -r "/tmp/$(echo ${MOD_REPO} | tr '/' '-')-"*/* /usr/share/minetest/games/minetest_game/mods/moreblocks/
-        rm -rf "/tmp/$(echo ${MOD_REPO} | tr '/' '-')"*
-    fi
+    INSTALL_COMMON_MOD moreblocks
 fi
 
 if [[ "${MINETEST_MOD_MOREORES}" == '1' ]]; then
-    MOD_REPO='minetest-mods/moreores'
-    GET_LATEST_RELEASE "${MOD_REPO}"
-    TARBALL="/tmp/$(echo ${MOD_REPO} | tr '/' '-').tar.gz"
-
-    if [[ -f "${TARBALL}" ]]; then
-        tar -xf "${TARBALL}" -C '/tmp'
-
-        if [[ ! -d '/usr/share/minetest/games/minetest_game/mods/moreores' ]]; then
-            mkdir -p '/usr/share/minetest/games/minetest_game/mods/moreores'
-        fi
-
-        cp -r "/tmp/$(echo ${MOD_REPO} | tr '/' '-')-"*/* /usr/share/minetest/games/minetest_game/mods/moreores/
-        rm -rf "/tmp/$(echo ${MOD_REPO} | tr '/' '-')"*
-    fi
+    INSTALL_COMMON_MOD moreores
 fi
 
 if [[ "${MINETEST_MOD_TORCHES}" == '1' ]]; then
-    MOD_REPO='minetest-mods/torches'
-    GET_LATEST_RELEASE "${MOD_REPO}"
-    TARBALL="/tmp/$(echo ${MOD_REPO} | tr '/' '-').tar.gz"
-
-    if [[ -f "${TARBALL}" ]]; then
-        tar -xf "${TARBALL}" -C '/tmp'
-
-        if [[ ! -d '/usr/share/minetest/games/minetest_game/mods/torches' ]]; then
-            mkdir -p '/usr/share/minetest/games/minetest_game/mods/torches'
-        fi
-
-        cp -r "/tmp/$(echo ${MOD_REPO} | tr '/' '-')-"*/* /usr/share/minetest/games/minetest_game/mods/torches/
-        rm -rf "/tmp/$(echo ${MOD_REPO} | tr '/' '-')"*
-    fi
+    INSTALL_COMMON_MOD torches
 fi
 
 # Change Port if you specified new one.
