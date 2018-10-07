@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Script that install vim and generates customized .vimrc file.
 
 OVERWRITE_USERS_VIMRC=1
 

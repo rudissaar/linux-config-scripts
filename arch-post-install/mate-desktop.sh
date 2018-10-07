@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Script that installs MATE Desktop environment on fresh Arch linua installation.
+# Script that installs MATE Desktop environment on fresh Arch linux installation.
 
 USERNAME='user'
 OVERWRITE_USERS_XINITRC=1
@@ -11,12 +11,13 @@ if [[ "${UID}" != '0' ]]; then
 fi
 
 # Install packages.
-pacman -S \
+pacman --noconfirm -S \
     xorg-server \
     xorg-xinit \
     lightdm \
     lightdm-gtk-greeter \
     mate \
+    mate-terminal \
     ttf-dejavu \
     networkmanager \
     network-manager-applet
