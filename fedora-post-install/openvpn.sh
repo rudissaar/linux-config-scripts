@@ -108,6 +108,10 @@ sed -i \
     's/^tls-auth ta\.key 0/tls-auth '$(echo "${OPENVPN_SERVER_DIR}" | sed 's/\//\\\//g')'\/ta\.key 0/g' \
     "${OPENVPN_SERVER_DIR}/server.conf"
 
+sed -i \
+    's/^status openvpn-status\.log$/status '$(echo "${OPENVPN_SERVER_DIR}" | sed 's/\//\\\//g')'\/openvpn-status\.log/g' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
+
 # Change Port if you specified new one.
 if [[ "${OPENVPN_PORT}" != '1194' ]]; then
     sed -i '/^port 1194/s/1194/'${OPENVPN_PORT}'/' "${OPENVPN_SERVER_DIR}/server.conf"
