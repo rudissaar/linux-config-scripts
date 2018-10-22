@@ -83,6 +83,31 @@ cd - 1> /dev/null
 # Change name of the Diffie-Hellman key file.
 sed -i 's/^dh [^.]*\.pem$/dh dh.pem/g' "${OPENVPN_SERVER_DIR}/server.conf"
 
+# Make paths to files absolulte.
+sed -i \
+    's/^ca ca\.crt$/ca '$(echo "${OPENVPN_SERVER_DIR}" | sed 's/\//\\\//g')'\/ca\.crt/g' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
+
+sed -i \
+    's/^cert server\.crt$/cert '$(echo "${OPENVPN_SERVER_DIR}" | sed 's/\//\\\//g')'\/server\.crt/g' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
+
+sed -i \
+    's/^key server\.key/key '$(echo "${OPENVPN_SERVER_DIR}" | sed 's/\//\\\//g')'\/server\.key/g' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
+
+sed -i \
+    's/^dh dh\.pem$/dh '$(echo "${OPENVPN_SERVER_DIR}" | sed 's/\//\\\//g')'\/dh\.pem/g' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
+
+sed -i \
+    's/^ifconfig-pool-persist ipp\.txt$/ifconfig-pool-persist '$(echo "${OPENVPN_SERVER_DIR}" | sed 's/\//\\\//g')'\/ipp\.txt/g' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
+
+sed -i \
+    's/^tls-auth ta\.key 0/tls-auth '$(echo "${OPENVPN_SERVER_DIR}" | sed 's/\//\\\//g')'\/ta\.key 0/g' \
+    "${OPENVPN_SERVER_DIR}/server.conf"
+
 # Change Port if you specified new one.
 if [[ "${OPENVPN_PORT}" != '1194' ]]; then
     sed -i '/^port 1194/s/1194/'${OPENVPN_PORT}'/' "${OPENVPN_SERVER_DIR}/server.conf"
@@ -202,4 +227,3 @@ fi
 # Enable OpenVPN service.
 systemctl enable openvpn-server@server.service
 systemctl restart openvpn-server@server.service
-
