@@ -268,8 +268,15 @@ if [[ "${RUN_UFW_NAT}" = '1' ]]; then
 fi
 
 # Enable OpenVPN service.
-systemctl enable openvpn-server@server
-systemctl restart openvpn-server@server
+if [[ "${OPENVPN_SERVER_DIR}" == '/etc/openvpn/server' ]]; then
+    systemctl enable openvpn-server@server
+    systemctl restart openvpn-server@server
+else
+    CONF_NAME="$(basename ${OPENVPN_SERVER_DIR})"
+    ln -sf "${OPENVPN_SERVER_DIR}/server.conf" "/etc/openvpn/server/${CONF_NAME}.conf"
+    systemctl enable openvpn-server@${CONF_NAME}
+    systemctl restart openvpn-server@${CONF_NAME}
+fi
 
 # Block that either gives information about firewall rules that you should apply, or just applies them.
 if [[ "${RUN_UFW_RULES}" = '1' ]]; then
