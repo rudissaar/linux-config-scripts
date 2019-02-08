@@ -20,7 +20,9 @@ pacman --noconfirm -S \
     mate-terminal \
     ttf-dejavu \
     networkmanager \
-    network-manager-applet
+    network-manager-applet \
+    pulseaudio \
+    pulseaudio-alsa
 
 # Add normal user with default parameters.
 useradd -m ${USERNAME}
