@@ -11,7 +11,8 @@ if [[ "${UID}" != '0' ]]; then
 fi
 
 # Install packages.
-pacman --noconfirm -S coreutils wget
+which wget 1> /dev/null 2>&1
+[[ "${?}" == '0' ]] || pacman --noconfirm -S wget
 
 # Download HLA archive.
 TMP_DATE="$(date +%s)"
