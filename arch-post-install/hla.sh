@@ -27,6 +27,11 @@ tar -xf "${TMP_FILE}" --directory "${TMP_PATH}"
 # Copy files.
 cp -r "${TMP_PATH}/usr/"* "${PACKAGE_POOL}/"
 
+for BINARY in $(find "${PACKAGE_POOL}/hla" -maxdepth 1 -type f -executable)
+do
+    ln -sf "${BINARY}" "${PACKAGE_POOL}/bin/$(basename ${BINARY})"
+done
+
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
 
