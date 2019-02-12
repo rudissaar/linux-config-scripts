@@ -11,6 +11,9 @@ if [[ "${UID}" != '0' ]]; then
 fi
 
 # Install packages.
+which grep 1> /dev/null 2>&1
+[[ "${?}" == '0' ]] || pacman --noconfirm -S grep
+
 which wget 1> /dev/null 2>&1
 [[ "${?}" == '0' ]] || pacman --noconfirm -S wget
 
@@ -32,6 +35,17 @@ for BINARY in $(find "${PACKAGE_POOL}/hla" -maxdepth 1 -type f -executable)
 do
     ln -sf "${BINARY}" "${PACKAGE_POOL}/bin/$(basename ${BINARY})"
 done
+
+# Setup global environment variables.
+grep -Fq 'export hlalib=' /etc/profile
+if [[ "${?}" != '0' ]]; then
+    echo "export hlalib=${PACKAGE_POOL}/hla/hlalib" >> /etc/profile
+fi
+
+grep -Fq 'export hlainc=' /etc/profile
+if [[ "${?}" != '0' ]]; then
+    echo "export hlainc=${PACKAGE_POOL}/hla/include" >> /etc/profile
+fi
 
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
