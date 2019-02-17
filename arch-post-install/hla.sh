@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+# Script that installs environment for High Level Assembly developemnt.
 
 PACKAGE_POOL="/usr"
 
 ORIGINAL_URL="http://www.plantation-productions.com/Webster/HighLevelAsm/HLAv2.16/linux.hla.tar.gz"
+FALLBACK_URL="http://legacy.murda.eu/donwloads/misc/hla-linux.tar.gz"
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -23,6 +25,15 @@ TMP_FILE="/tmp/hla-${TMP_DATE}.tar.gz"
 TMP_PATH="/tmp/hla-${TMP_DATE}"
 
 wget "${ORIGINAL_URL}" -O "${TMP_FILE}"
+
+if [[ "${?}" != '0' ]]; then
+    wget "${FALLBACK_URL}" -O "${TMP_FILE}"
+fi
+
+if [[ "${?}" != '0' ]]; then
+    echo '> Unable to download required files, exiting.'
+    exit 1
+fi
 
 # Extract archive.
 [[ -d "${TMP_PATH}" ]] || mkdir -p "${TMP_PATH}"
@@ -51,4 +62,3 @@ fi
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
 
 echo '> Finished.'
-
