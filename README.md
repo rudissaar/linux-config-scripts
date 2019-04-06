@@ -18,7 +18,8 @@ wget -O - https://.../linux-config-scripts/master/debian-post-install/vim.sh | b
 
 You should also be able to call them from `chef`, if you are planning to run scripts on multiple servers.
 
-Many scripts include tweakable variables, if you wish to modify them then you should save script on disk before you execute it.
+Many scripts include tweakable variables, if you wish to modify them then
+you should save script on disk before you execute it.
 
 ## Contents
 
@@ -53,3 +54,4 @@ Many scripts include tweakable variables, if you wish to modify them then you sh
      * [minetest-server.sh](./fedora-post-install/minetest-server.sh)
      * [openvpn.sh](./fedora-post-install/openvpn.sh)
      * [fasm.sh](./fedora-post-install/fasm.sh)
+     * [onionshare.sh](./fedora-post-install/onionshare.sh)
