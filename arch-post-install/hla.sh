@@ -4,7 +4,7 @@
 PACKAGE_POOL="/usr"
 
 ORIGINAL_URL="http://www.plantation-productions.com/Webster/HighLevelAsm/HLAv2.16/linux.hla.tar.gz"
-FALLBACK_URL="http://legacy.murda.eu/donwloads/misc/hla-linux.tar.gz"
+FALLBACK_URL="http://legacy.murda.eu/downloads/misc/hla-linux.tar.gz"
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -61,4 +61,6 @@ fi
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
 
+# Let user know that script has finished it's job.
 echo '> Finished.'
+
