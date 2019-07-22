@@ -13,6 +13,9 @@ if [[ "${UID}" != '0' ]]; then
 fi
 
 # Install packages.
+dnf install -y \
+    glibc.i686
+
 which grep 1> /dev/null 2>&1
 [[ "${?}" == '0' ]] || dnf install -y grep
 
