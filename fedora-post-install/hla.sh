@@ -16,6 +16,9 @@ fi
 dnf install -y \
     glibc.i686
 
+which tar 1> /dev/null 2>&1
+[[ "${?}" == '0' ]] || dnf install -y tar
+
 which grep 1> /dev/null 2>&1
 [[ "${?}" == '0' ]] || dnf install -y grep
 
