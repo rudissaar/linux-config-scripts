@@ -14,7 +14,8 @@ fi
 
 # Install packages.
 dnf install -y \
-    glibc.i686
+    glibc.i686 \
+    binutils
 
 which tar 1> /dev/null 2>&1
 [[ "${?}" == '0' ]] || dnf install -y tar
