@@ -21,6 +21,12 @@ for REQUIREMENT in ${REQUIREMENTS}; do
     [[ "${?}" == '0' ]] || dnf install -y ${REQUIREMENT}
 done
 
+which java 1> /dev/null 2>&1
+[[ "${?}" == '0' ]] || dnf install -y java-latest-openjdk
+
+which javac 1> /dev/null 2>&1
+[[ "${?}" == '0' ]] || dnf install -y java-latest-openjdk-devel
+
 # Download Apache NetBeans archive.
 TMP_DATE="$(date +%s)"
 TMP_FILE="/tmp/apache-netbeans-${TMP_DATE}.zip"
