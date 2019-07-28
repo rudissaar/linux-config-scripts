@@ -2,8 +2,10 @@
 
 PACKAGE_POOL="/usr/local"
 
-DOWNLOAD_EU_URL="https://www-eu.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-11.0/incubating-netbeans-11.0-bin.zip"
-DOWNLOAD_US_URL="https://www-us.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-11.0/incubating-netbeans-11.0-bin.zip"
+VERSION='11.0'
+
+DOWNLOAD_EU_URL="https://www-eu.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
+DOWNLOAD_US_URL="https://www-us.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -47,11 +49,26 @@ do
     ln -sf "${BINARY}" "${PACKAGE_POOL}/bin/$(basename ${BINARY})"
 done
 
+# Create desktop entry for application.
+if [[ ! -f "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop" ]]; then
+    cat > "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop" <<EOL
+[Desktop Entry]
+Version=${VERSION}
+Name=NetBeans
+Comment=Integrated Development Environment
+Exec=netbeans
+Icon=netbeans
+Categories=Development;IDE;Java;
+Terminal=false
+Type=Application
+Keywords=development;Java;IDE;platform;javafx;javase;
+StartupWMClass=NetBeans IDE ${VERSION}
+EOL
+fi
+
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
 
 # Let user know that script has finished it's job.
 echo '> Finished.'
-
-exit
 
