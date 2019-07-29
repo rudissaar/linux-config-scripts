@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+# Script that installs Apache NetBeans IDE on your system.
 
 PACKAGE_POOL="/usr/local"
-
 VERSION='11.0'
+USE_ICON_FROM_ARCHIVE=0
 
 DOWNLOAD_EU_URL="https://www-eu.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
 DOWNLOAD_US_URL="https://www-us.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
@@ -57,13 +58,19 @@ done
 
 # Create desktop entry for application.
 if [[ ! -f "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop" ]]; then
+    if [[ "${USE_ICON_FROM_ARCHIVE}" != '0' ]]; then
+        ICON="${PACKAGE_POOL}/share/netbeans/nb/netbans.png"
+    else
+        ICON='netbeans'
+    fi
+
     cat > "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop" <<EOL
 [Desktop Entry]
 Version=${VERSION}
 Name=NetBeans
 Comment=Integrated Development Environment
 Exec=netbeans
-Icon=netbeans
+Icon=${ICON}
 Categories=Development;IDE;Java;
 Terminal=false
 Type=Application
