@@ -36,6 +36,7 @@ you should save script on disk before you execute it.
    * [vim.sh](./debian-post-install/vim.sh)
    * [wet-server.sh](./debian-post-install/wet-server.sh)
  * [fedora-post-install](./fedora-post-install)
+   * [adobe-flash.sh](./fedora-post-install/adobe-flash.sh)
    * [apache-netbeans.sh](./fedora-post-install/apache-netbeans.sh)
    * [fasm.sh](./fedora-post-install/fasm.sh)
    * [grub-efi.sh](./fedora-post-install/grub-efi.sh)
