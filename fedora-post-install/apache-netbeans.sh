@@ -2,11 +2,16 @@
 # Script that installs Apache NetBeans IDE on your system.
 
 PACKAGE_POOL="/usr/local"
-VERSION='11.0'
+VERSION='11.2'
 USE_ICON_FROM_ARCHIVE=0
 
-DOWNLOAD_EU_URL="https://www-eu.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
-DOWNLOAD_US_URL="https://www-us.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
+if [[ "${VERSION}" == '11.0' ]]; then
+    DOWNLOAD_EU_URL="https://www-eu.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
+    DOWNLOAD_US_URL="https://www-us.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
+else
+    DOWNLOAD_EU_URL="https://www-eu.apache.org/dist/netbeans/netbeans/${VERSION}/netbeans-${VERSION}-bin.zip";
+    DOWNLOAD_US_URL="https://www-us.apache.org/dist/netbeans/netbeans/${VERSION}/netbeans-${VERSION}-bin.zip";
+fi
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
