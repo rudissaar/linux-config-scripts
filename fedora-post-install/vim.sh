@@ -2,13 +2,19 @@
 
 OVERWRITE_USERS_VIMRC=1
 
+# You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
     exit 1
 fi
 
-# Install packages.
-dnf install -y vim
+# Install packages if necessary.
+which vim 1> /dev/null 2>&1
+
+if [[ "${?}" != '0' ]]; then
+    dnf update --refresh
+    dnf install -y vim
+fi
 
 # Replace vi command with vim.
 grep -Fq 'alias vi=' /etc/bashrc
@@ -18,6 +24,7 @@ if [[ "${?}" != '0' ]]; then
     echo "alias vi='vim'" >> /etc/bashrc
 fi
 
+# Create .vimrc file in /etc/skel directory.
 if [[ ! -f /etc/skel/.vimrc ]]; then
     touch /etc/skel/.vimrc
 fi
@@ -43,7 +50,7 @@ if [[ "${?}" != '0' ]]; then
     echo 'set mouse-=a' >> /etc/skel/.vimrc
 fi
 
-# Sset size of tab.
+# Set size of tab.
 grep -Fq 'set tabstop=4' /etc/skel/.vimrc
 
 if [[ "${?}" != '0' ]]; then
@@ -64,6 +71,7 @@ if [[ "${?}" != '0' ]]; then
     echo 'set shiftwidth=4' >> /etc/skel/.vimrc
 fi
 
+# Block that populates user directories with generated .vimrc file.
 if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
     cp /etc/skel/.vimrc "${HOME}/.vimrc"
 
@@ -82,5 +90,6 @@ if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
     fi
 fi
 
+# Let user know that script has finished it's job.
 echo '> Finished.'
 
