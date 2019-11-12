@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Script that installs and configures vim editor on current system.
 
 OVERWRITE_USERS_VIMRC=1
 
