@@ -9,10 +9,25 @@ if [[ "${UID}" != '0' ]]; then
     exit 1
 fi
 
-# Install packages if necessary.
+# Variable that keeps track if repository is already refreshed.
 REPO_REFRESHED=0
 
-# Nginx.
+# Install requirements.
+
+# sed.
+which sed 1> /dev/null 2>&1
+
+# Install packages if necessary.
+if [[ "${?}" != '0' ]]; then
+    if [[ "${REPO_REFRESHED}" == '0' ]]; then
+        dnf update --refresh
+        REPO_REFRESHED=1
+    fi
+
+    dnf install -y sed
+fi
+
+# nginx.
 which nginx 1> /dev/null 2>&1
 
 if [[ "${?}" != '0' ]]; then
@@ -24,7 +39,7 @@ if [[ "${?}" != '0' ]]; then
     dnf install -y nginx
 fi
 
-# PHP.
+# php.
 which php 1> /dev/null 2>&1
 
 if [[ "${?}" != '0' ]]; then
@@ -40,13 +55,14 @@ if [[ "${?}" != '0' ]]; then
         php-json \
         php-jsonlint \
         php-mbstring \
+        php-mysqlnd \
         php-opcache \
         php-pdo \
         php-process \
         php-xml
 fi
 
-# PHP FPM.
+# php-fpm.
 which php-fpm 1> /dev/null 2>&1
 
 if [[ "${?}" != '0' ]]; then
@@ -58,7 +74,7 @@ if [[ "${?}" != '0' ]]; then
     dnf install -y php-fpm
 fi
 
-# Composer.
+# composer.
 which composer 1> /dev/null 2>&1
 
 if [[ "${?}" != '0' ]]; then
@@ -69,6 +85,10 @@ if [[ "${?}" != '0' ]]; then
 
     dnf install -y composer
 fi
+
+# Fix configuration.
+sed -i 's/^user = .*$/user = nginx/g' /etc/php-fpm.d/www.conf
+sed -i 's/^group = .*$/group = nginx/g' /etc/php-fpm.d/www.conf
 
 # Fix ownerships.
 chown -R nginx:nginx \
