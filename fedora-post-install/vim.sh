@@ -91,6 +91,6 @@ if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
     fi
 fi
 
-# Let user know that script has finished it's job.
+# Let user know that script has finished its job.
 echo '> Finished.'
 

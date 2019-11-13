@@ -27,6 +27,6 @@ if [[ "${?}" != '0' ]]; then
     dnf remove -y gdm
 fi
 
-# Let user know that script has finished it's job.
+# Let user know that script has finished its job.
 echo '> Finished.'
 
