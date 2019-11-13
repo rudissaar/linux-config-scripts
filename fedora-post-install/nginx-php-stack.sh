@@ -2,6 +2,7 @@
 # Script that installs nginx and php stack on current system.
 
 ENABLE_SERVICES=1
+SET_CGI_FIX_PATHINFO_TO_0=1
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -25,6 +26,18 @@ if [[ "${?}" != '0' ]]; then
     fi
 
     dnf install -y sed
+fi
+
+# grep.
+which grep 1> /dev/null 2>&1
+
+if [[ "${?}" != '0' ]]; then
+    if [[ "${REPO_REFRESHED}" == '0' ]]; then
+        dnf update --refresh
+        REPO_REFRESHED=1
+    fi
+
+    dnf install -y grep
 fi
 
 # nginx.
@@ -89,6 +102,16 @@ fi
 # Fix configuration.
 sed -i 's/^user = .*$/user = nginx/g' /etc/php-fpm.d/www.conf
 sed -i 's/^group = .*$/group = nginx/g' /etc/php-fpm.d/www.conf
+
+grep -Fq 'cgi.fix_pathinfo=' /etc/php.ini
+
+if [[ "${?}" != '0' ]]; then
+    echo 'cgi.fix_pathinfo=0' >> /etc/php.ini
+else
+    if [[ "${SET_CGI_FIX_PATHINFO_TO_0}" == '1' ]]; then
+        sed -i -E 's/^;?cgi.fix_pathinfo=.*$/cgi.fix_pathinfo=0/g' /etc/php.ini
+    fi
+fi
 
 # Fix ownerships.
 chown -R nginx:nginx \
