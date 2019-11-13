@@ -3,6 +3,7 @@
 
 ENABLE_SERVICES=1
 SET_CGI_FIX_PATHINFO_TO_0=1
+EXPOSE_PHP_OFF=1
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -103,13 +104,23 @@ fi
 sed -i 's/^user = .*$/user = nginx/g' /etc/php-fpm.d/www.conf
 sed -i 's/^group = .*$/group = nginx/g' /etc/php-fpm.d/www.conf
 
-grep -Fq 'cgi.fix_pathinfo=' /etc/php.ini
+if [[ "${SET_CGI_FIX_PATHINFO_TO_0}" == '1' ]]; then
+    grep -Fq 'cgi.fix_pathinfo=' /etc/php.ini
 
-if [[ "${?}" != '0' ]]; then
-    echo 'cgi.fix_pathinfo=0' >> /etc/php.ini
-else
-    if [[ "${SET_CGI_FIX_PATHINFO_TO_0}" == '1' ]]; then
+    if [[ "${?}" != '0' ]]; then
+        echo 'cgi.fix_pathinfo=0' >> /etc/php.ini
+    else
         sed -i -E 's/^;?cgi.fix_pathinfo=.*$/cgi.fix_pathinfo=0/g' /etc/php.ini
+    fi
+fi
+
+if [[ "${EXPOSE_PHP_OFF}" == '1' ]]; then
+    grep -Fq 'expose_php =' /etc/php.ini
+
+    if [[ "${?}" != '0' ]]; then
+        echo 'expose_php = Off' >> /etc/php.ini
+    else
+        sed -i -E 's/^;?expose_php\s?=\s?.*$/expose_php = Off/g' /etc/php.ini
     fi
 fi
 
