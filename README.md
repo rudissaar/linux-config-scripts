@@ -45,6 +45,7 @@ you should save script on disk before you execute it.
    * [mariadb.sh](./fedora-post-install/mariadb.sh)
    * [minetest-server.sh](./fedora-post-install/minetest-server.sh)
    * [nfs-server.sh](./fedora-post-install/nfs-server.sh)
+   * [nginx-php-stack.sh](./fedora-post-install/nginx-php-stack.sh)
    * [nouveau-off.sh](./fedora-post-install/nouveau-off.sh)
    * [old-kernels.sh](./fedora-post-install/old-kernels.sh)
    * [onionshare.sh](./fedora-post-install/onionshare.sh)
