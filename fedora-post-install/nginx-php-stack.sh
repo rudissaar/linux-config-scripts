@@ -72,6 +72,11 @@ if [[ "${?}" != '0' ]]; then
         php-mysqlnd \
         php-opcache \
         php-pdo \
+        php-pecl-apcu \
+        php-pecl-apcu-bc \
+        php-pecl-imagick \
+        php-pecl-memcache \
+        php-pgsql \
         php-process \
         php-xml
 fi
