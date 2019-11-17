@@ -34,8 +34,14 @@ ENSURE_DEPENDENCY 'date' 'coreutils'
 ENSURE_DEPENDENCY 'wget' 'wget'
 ENSURE_DEPENDENCY 'tar' 'tar'
 
+dnf install -y \
+    compat-wxGTK3-gtk2.i686 \
+    libaio.i686 \
+    joystick \
+    mesa-libGLU.i686 \
+    wxBase3.i686
+
 # Download PCSX2 archive.
-TMP_DATE="$(date +%s)"
 TMP_FILE="/tmp/pcsx2-$(date +%s).tar.gz"
 
 wget "${DOWNLOAD_URL}" -O "${TMP_FILE}"
@@ -46,7 +52,7 @@ if [[ "${?}" != '0' ]]; then
 fi
 
 # Extract PCSX2 archive.
-tar -xf "${TMP_FILE}" --directory /
+tar -xf "${TMP_FILE}" --same-owner --directory /
 
 # Cleanup.
 rm -rf "${TMP_FILE}"
