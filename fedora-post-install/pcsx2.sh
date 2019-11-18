@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 
+# Script that install PCSX2 Playstation 2 emulator on Fedora GNU/Linux system.
 
-PACKAGE_POOL='/usr/local'
+PACKAGE_POOL='/usr'
 DOWNLOAD_URL='http://legacy.murda.eu/downloads/pcsx2/fedora/pcsx2-1.4-11.zip'
 
 # You need root permissions to run this script.
@@ -36,10 +36,13 @@ ENSURE_DEPENDENCY 'wget' 'wget'
 ENSURE_DEPENDENCY 'unzip' 'unzip'
 
 dnf install -y \
+    alsa-lib.i686 \
     compat-wxGTK3-gtk2.i686 \
     libaio.i686 \
     joystick \
     mesa-libGLU.i686 \
+    portaudio.i686 \
+    soundtouch.i686 \
     wxBase3.i686
 
 # Download PCSX2 archive.
