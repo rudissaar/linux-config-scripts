@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # 
 
-DOWNLOAD_URL='http://legacy.murda.eu/downloads/pcsx2/fedora/pcsx2-1.4-11.tar.gz'
+PACKAGE_POOL='/usr/local'
+DOWNLOAD_URL='http://legacy.murda.eu/downloads/pcsx2/fedora/pcsx2-1.4-11.zip'
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -32,7 +33,7 @@ ENSURE_DEPENDENCY () {
 # Install packages.
 ENSURE_DEPENDENCY 'date' 'coreutils'
 ENSURE_DEPENDENCY 'wget' 'wget'
-ENSURE_DEPENDENCY 'tar' 'tar'
+ENSURE_DEPENDENCY 'unzip' 'unzip'
 
 dnf install -y \
     compat-wxGTK3-gtk2.i686 \
@@ -42,7 +43,9 @@ dnf install -y \
     wxBase3.i686
 
 # Download PCSX2 archive.
-TMP_FILE="/tmp/pcsx2-$(date +%s).tar.gz"
+TMP_DATE="$(date +%s)"
+TMP_FILE="/tmp/pcsx2-${TMP_DATE}.tar.gz"
+TMP_PATH="/tmp/pcsx2-${TMP_DATE}"
 
 wget "${DOWNLOAD_URL}" -O "${TMP_FILE}"
 
@@ -52,10 +55,19 @@ if [[ "${?}" != '0' ]]; then
 fi
 
 # Extract PCSX2 archive.
-tar -xf "${TMP_FILE}" --same-owner --directory /
+[[ -d "${TMP_PATH}" ]] || mkdir -p "${TMP_PATH}"
+unzip -q "${TMP_FILE}" -d "${TMP_PATH}"
+
+for BINARY in $(find "${TMP_PATH}/bin")
+do
+    chmod +x "${BINARY}"
+done
+
+# Copy files.
+cp -r "${TMP_PATH}/"* "${PACKAGE_POOL}/"
 
 # Cleanup.
-rm -rf "${TMP_FILE}"
+rm -rf "${TMP_FILE}" "${TMP_PATH}"
 
 # Let user know that script has finished its job.
 echo '> Finished.'
