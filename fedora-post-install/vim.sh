@@ -30,6 +30,11 @@ if [[ ! -f /etc/skel/.vimrc ]]; then
     touch /etc/skel/.vimrc
 fi
 
+# Create .gvimrc file in /etc/skel directory.
+if [[ ! -f /etc/skel/.gvimrc ]]; then
+    touch /etc/skel/.gvimrc
+fi
+
 # Enable syntax.
 grep -Fq 'syntax on' /etc/skel/.vimrc
 
@@ -49,6 +54,13 @@ grep -Fq 'set mouse-=a' /etc/skel/.vimrc
 
 if [[ "${?}" != '0' ]]; then
     echo 'set mouse-=a' >> /etc/skel/.vimrc
+fi
+
+# Enable visual mode for gvim.
+grep -Fq 'set mouse=a' /etc/skel/.gvimrc
+
+if [[ "${?}" != '0' ]]; then
+    echo 'set mouse=a' >> /etc/skel/.gvimrc
 fi
 
 # Set size of tab.
@@ -84,7 +96,8 @@ if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
         for USERNAME in ${USERNAMES}; do
             HOME_DIR=$(eval echo "~${USERNAME}")
 	        cp /etc/skel/.vimrc "${HOME_DIR}/.vimrc"
-            chown ${USERNAME}:${USERNAME} "${HOME_DIR}/.vimrc"
+	        cp /etc/skel/.gvimrc "${HOME_DIR}/.gvimrc"
+            chown ${USERNAME}:${USERNAME} "${HOME_DIR}/.vimrc" "${HOME_DIR}/.gvimrc"
         done
     else
         echo '> Unable to overwrite .vimrc for normal users, missing file: "/etc/login.defs".'
