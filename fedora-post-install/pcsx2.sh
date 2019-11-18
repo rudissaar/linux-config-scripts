@@ -31,9 +31,34 @@ ENSURE_DEPENDENCY () {
 }
 
 # Install packages.
+FEDORA_VERSION=$(rpm -E %fedora)
+if [[ ${FEDORA_VERSION} -lt 30 ]]; then
+    if [[ "${REPO_REFRESHED}" == '0' ]]; then
+        dnf update --refresh
+        REPO_REFRESHED=1
+    fi
+
+    # Enable RPM Fusion repositories.
+    dnf install -y \
+        https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+        https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+    # Install PCSX2 package from repository.
+    dnf install -y pcsx2
+
+    # Let user know that script has finished its job.
+    echo '> Finished.'
+    exit 0
+fi
+
 ENSURE_DEPENDENCY 'date' 'coreutils'
 ENSURE_DEPENDENCY 'wget' 'wget'
 ENSURE_DEPENDENCY 'unzip' 'unzip'
+
+if [[ "${REPO_REFRESHED}" == '0' ]]; then
+    dnf update --refresh
+    REPO_REFRESHED=1
+fi
 
 dnf install -y \
     alsa-lib.i686 \
