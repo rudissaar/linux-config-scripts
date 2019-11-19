@@ -70,6 +70,7 @@ fi
 ENSURE_DEPENDENCY 'date' 'coreutils'
 ENSURE_DEPENDENCY 'wget' 'wget'
 ENSURE_DEPENDENCY 'unzip' 'unzip'
+ENSURE_DEPENDENCY 'awk' 'gawk'
 
 if [[ "${REPO_REFRESHED}" == '0' ]]; then
     dnf update --refresh
@@ -106,6 +107,10 @@ for BINARY in $(find "${TMP_PATH}/bin")
 do
     chmod +x "${BINARY}"
 done
+
+# Create file that can be used to remove PCSX2 files.
+awk '{ printf "rm -r '${PACKAGE_POOL}'"; print }' "${TMP_PATH}/share/pcsx2/uninstall.txt" > "${TMP_PATH}/share/pcsx2/uninstall.tmp"
+mv "${TMP_PATH}/share/pcsx2/uninstall.tmp" "${TMP_PATH}/share/pcsx2/uninstall.txt"
 
 # Copy files.
 cp -r "${TMP_PATH}/"* "${PACKAGE_POOL}/"
