@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Script that install PCSX2 Playstation 2 emulator on Fedora GNU/Linux system.
 
-USE_COPR_REPO=0
+USE_COPR_REPO=1
 PACKAGE_POOL='/usr'
 DOWNLOAD_URL='http://legacy.murda.eu/downloads/pcsx2/fedora/pcsx2-1.4-11.zip'
 
@@ -35,7 +35,7 @@ ENSURE_DEPENDENCY () {
 if [[ "${USE_COPR_REPO}" == '1' ]]; then
     ENSURE_DEPENDENCY 'sed' 'sed'
 
-    dnf copr enable victoroliveira/pcsx2-git
+    dnf copr enable -y victoroliveira/pcsx2-git
     sed -i 's/$basearch/i386/' '/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:victoroliveira:pcsx2-git.repo'
 
     dnf update --refresh

@@ -2,7 +2,7 @@
 # Script that installs libvirt QEMU/KVM stack on current system.
 
 # Set this to 1 if you wish to remove all password requirements for org.libvirt.unix policy.
-# By doing this your system will be less secure due no authentication is required.
+# By doing this your system will be less secure due to no required authentication.
 POLKIT_NO_PASSWORD=0
 POLKIT_FILE='/usr/share/polkit-1/actions/org.libvirt.unix.policy'
 

@@ -12,6 +12,6 @@ fi
 # Install packages.
 dnf install -y "${URL}"
 
-# Let user know that script has finished it's job.
+# Let user know that script has finished its job.
 echo '> Finished.'
 

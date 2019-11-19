@@ -87,6 +87,6 @@ fi
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
 
-# Let user know that script has finished it's job.
+# Let user know that script has finished its job.
 echo '> Finished.'
 
