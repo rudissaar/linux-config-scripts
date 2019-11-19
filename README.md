@@ -51,6 +51,7 @@ you should save script on disk before you execute it.
    * [onionshare.sh](./fedora-post-install/onionshare.sh)
    * [openvpn.sh](./fedora-post-install/openvpn.sh)
    * [pam-su-no-password.sh](./fedora-post-install/pam-su-no-password.sh)
+   * [pcsx2.sh](./fedora-post-install/pcsx2.sh)
    * [replace-lightdm-with-gdm.sh](./fedora-post-install/replace-lightdm-with-gdm.sh)
    * [samba-server-public.sh](./fedora-post-install/samba-server-public.sh)
    * [selinux-off.sh](./fedora-post-install/selinux-off.sh)
