@@ -33,6 +33,7 @@ ENSURE_DEPENDENCY () {
 # Install requirements if necessary.
 ENSURE_DEPENDENCY 'wget' 'wget'
 ENSURE_DEPENDENCY 'unzip' 'unzip'
+ENSURE_DEPENDENCY 'linux32' 'util-linux'
 
 # Download Wolfenstein: Enemy Territory archive.
 TMP_DATE="$(date +%s)"
@@ -66,7 +67,6 @@ chmod +x "${INSTALLER}"
 [[ -d "${WET_DIR}" ]] || mkdir -p "${WET_DIR}"
 
 cp "${TMP_PATH}/bin/Linux/x86/et.x86" "${WET_DIR}"
-cp "${TMP_PATH}/bin/Linux/x86/et" "${WET_DIR}"
 rm "${TMP_PATH}/etmain/description.txt"
 cp -r "${TMP_PATH}/etmain" "${WET_DIR}"
 rm "${TMP_PATH}/pb/PB_EULA.txt"
@@ -76,13 +76,15 @@ cp -r "${TMP_PATH}/pb" "${WET_DIR}"
 cp "${TMP_PATH}/ET.xpm" "${WET_DIR}/et.xpm"
 
 # Create desktop entry for application.
+[[ -d /usr/local/share/applications ]] || mkdir -p /usr/local/share/applications
+
     cat > "/usr/local/share/applications/wet.desktop" <<EOL
 [Desktop Entry]
 Version=2.60b
 Name=Wolfenstein: Enemy Territory
 Comment=World War II first-person shooter
-Exec=${WET_DIR}
-Exec=${WET_DIR}/et
+Path=${WET_DIR}
+Exec=linux32 ${WET_DIR}/et.x86
 Icon=${WET_DIR}/et.xpm
 Categories=Game;ActionGame;
 Terminal=false
