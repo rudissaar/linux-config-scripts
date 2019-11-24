@@ -67,7 +67,11 @@ chmod +x "${INSTALLER}"
 
 cp "${TMP_PATH}/bin/Linux/x86/et.x86" "${WET_DIR}"
 cp "${TMP_PATH}/bin/Linux/x86/et" "${WET_DIR}"
+rm "${TMP_PATH}/etmain/description.txt"
 cp -r "${TMP_PATH}/etmain" "${WET_DIR}"
+rm "${TMP_PATH}/pb/PB_EULA.txt"
+rm -r "${TMP_PATH}/pb/.directory"
+rm -r "${TMP_PATH}/pb/htm"
 cp -r "${TMP_PATH}/pb" "${WET_DIR}"
 cp "${TMP_PATH}/ET.xpm" "${WET_DIR}/et.xpm"
 
