@@ -75,6 +75,22 @@ rm -r "${TMP_PATH}/pb/htm"
 cp -r "${TMP_PATH}/pb" "${WET_DIR}"
 cp "${TMP_PATH}/ET.xpm" "${WET_DIR}/et.xpm"
 
+# Create desktop entry for application.
+    cat > "/usr/local/share/applications/wet.desktop" <<EOL
+[Desktop Entry]
+Version=2.60b
+Name=Wolfenstein: Enemy Territory
+Comment=World War II first-person shooter
+Exec=${WET_DIR}
+Exec=${WET_DIR}/et
+Icon=${WET_DIR}/et.xpm
+Categories=Game;ActionGame;
+Terminal=false
+Type=Application
+MimeType=x-scheme-handler/et;
+Keywords=team-based;multiplayer;tactical;WWII;enemy;territory;
+EOL
+
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
 

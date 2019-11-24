@@ -58,6 +58,7 @@ you should save script on disk before you execute it.
    * [selinux-off.sh](./fedora-post-install/selinux-off.sh)
    * [teamspeak3-client.sh](./fedora-post-install/teamspeak3-client.sh)
    * [vim.sh](./fedora-post-install/vim.sh)
+   * [wet-client.sh](./fedora-post-install/wet-client.sh)
  * [rhel-post-install](./rhel-post-install)
    * [nfs-server.sh](./rhel-post-install/nfs-server.sh)
    * [rsyslog-server.sh](./rhel-post-install/rsyslog-server.sh)
