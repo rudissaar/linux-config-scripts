@@ -33,6 +33,7 @@ ENSURE_DEPENDENCY () {
 # Install requirements if necessary.
 ENSURE_DEPENDENCY 'wget' 'wget'
 ENSURE_DEPENDENCY 'unzip' 'unzip'
+ENSURE_DEPENDENCY 'modprobe' 'kmod'
 ENSURE_DEPENDENCY 'linux32' 'util-linux'
 
 # Download Wolfenstein: Enemy Territory archive.
@@ -74,6 +75,17 @@ rm -r "${TMP_PATH}/pb/.directory"
 rm -r "${TMP_PATH}/pb/htm"
 cp -r "${TMP_PATH}/pb" "${WET_DIR}"
 cp "${TMP_PATH}/ET.xpm" "${WET_DIR}/et.xpm"
+
+# Enable required kernel modules.
+modprobe snd-pcm-oss && modprobe snd-seq-device && modprobe snd-seq-oss
+
+if [[ ! -f '/etc/modules-load.d/dsp.conf' ]]; then
+    cat > '/etc/modules-load.d/dsp.conf' <<EOL
+snd-pcm-oss
+snd-seq-device
+snd-seq-oss
+EOL
+fi
 
 # Create desktop entry for application.
 [[ -d /usr/local/share/applications ]] || mkdir -p /usr/local/share/applications
