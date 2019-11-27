@@ -88,9 +88,9 @@ EOL
 fi
 
 # Create desktop entry for application.
-[[ -d /usr/local/share/applications ]] || mkdir -p /usr/local/share/applications
+[[ ! -d /usr/local/share/applications ]] || mkdir -p /usr/local/share/applications
 
-    cat > "/usr/local/share/applications/wet.desktop" <<EOL
+cat > "/usr/local/share/applications/wet.desktop" <<EOL
 [Desktop Entry]
 Version=2.60b
 Name=Wolfenstein: Enemy Territory
