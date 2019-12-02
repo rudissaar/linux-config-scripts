@@ -6,21 +6,44 @@ OVERWRITE_USERS_VIMRC=1
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
 
-# Install packages if necessary.
-which vim 1> /dev/null 2>&1
+# Function that checks if required binary exists and installs it if necassary.
+ENSURE_DEPENDENCY () {
+    REQUIRED_BINARY=$(basename "${1}")
+    REPO_PACKAGE="${2}"
+    [[ -n "${REPO_PACKAGE}" ]] || REPO_PACKAGE="${REQUIRED_BINARY}"
 
-if [[ "${?}" != '0' ]]; then
-    dnf update --refresh
+    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+        if [[ "${REPO_UPDATED}" == '0' ]]; then
+            dnf check-update
+            REPO_UPDATED=1
+        fi
+
+        dnf install -y "${REPO_PACKAGE}"
+    fi
+}
+
+# Variable that keeps track if repository is already refreshed.
+REPO_UPDATED=0
+
+# Install dependencies if necassary.
+ENSURE_DEPENDENCY 'grep'
+ENSURE_DEPENDENCY 'awk' 'gawk'
+
+# Install packages if necessary.
+if ! command -v vim 1> /dev/null; then
+    if [[ ${REPO_UPDATED} -eq 0 ]]; then
+        dnf check-update
+    fi
+
     dnf install -y vim
 fi
 
 # Replace vi command with vim.
-grep -Fq 'alias vi=' /etc/bashrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'alias vi=' /etc/bashrc; then
     echo >> /etc/bashrc
     echo "alias vi='vim'" >> /etc/bashrc
 fi
@@ -36,51 +59,37 @@ if [[ ! -f /etc/skel/.gvimrc ]]; then
 fi
 
 # Enable syntax.
-grep -Fq 'syntax on' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'syntax on' /etc/skel/.vimrc; then
     echo 'syntax on' >> /etc/skel/.vimrc
 fi
 
 # Display line numbers.
-grep -Fq 'set number' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set number' /etc/skel/.vimrc; then
     echo 'set number' >> /etc/skel/.vimrc
 fi
 
 # Disable visual mode.
-grep -Fq 'set mouse-=a' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set mouse-=a' /etc/skel/.vimrc; then
     echo 'set mouse-=a' >> /etc/skel/.vimrc
 fi
 
 # Enable visual mode for gvim.
-grep -Fq 'set mouse=a' /etc/skel/.gvimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set mouse=a' /etc/skel/.gvimrc; then
     echo 'set mouse=a' >> /etc/skel/.gvimrc
 fi
 
 # Set size of tab.
-grep -Fq 'set tabstop=4' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set tabstop=4' /etc/skel/.vimrc; then
     echo 'set tabstop=4' >> /etc/skel/.vimrc
 fi
 
 # Use spaces instead of tabs.
-grep -Fq 'set expandtab' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set expandtab' /etc/skel/.vimrc; then
     echo 'set expandtab' >> /etc/skel/.vimrc
 fi
 
 # Set size of indent.
-grep -Fq 'set shiftwidth=4' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set shiftwidth=4' /etc/skel/.vimrc; then
     echo 'set shiftwidth=4' >> /etc/skel/.vimrc
 fi
 
@@ -97,7 +106,7 @@ if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
             HOME_DIR=$(eval echo "~${USERNAME}")
 	        cp /etc/skel/.vimrc "${HOME_DIR}/.vimrc"
 	        cp /etc/skel/.gvimrc "${HOME_DIR}/.gvimrc"
-            chown ${USERNAME}:${USERNAME} "${HOME_DIR}/.vimrc" "${HOME_DIR}/.gvimrc"
+            chown "${USERNAME}:${USERNAME}" "${HOME_DIR}/.vimrc" "${HOME_DIR}/.gvimrc"
         done
     else
         echo '> Unable to overwrite .vimrc for normal users, missing file: "/etc/login.defs".'
