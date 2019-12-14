@@ -16,37 +16,47 @@ fi
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
 
-REQUIREMENTS=('wget' 'grep' 'unzip')
+# Function that checks if required binary exists and installs it if necassary.
+ENSURE_DEPENDENCY () {
+    REQUIRED_BINARY=$(basename "${1}")
+    REPO_PACKAGE="${2}"
+    [[ -n "${REPO_PACKAGE}" ]] || REPO_PACKAGE="${REQUIRED_BINARY}"
 
-# Check for requirements and install them if necessary.
-for REQUIREMENT in ${REQUIREMENTS}; do
-    which ${REQUIREMENT} 1> /dev/null 2>&1
-    [[ "${?}" == '0' ]] || dnf install -y ${REQUIREMENT}
-done
+    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+        if [[ "${REPO_UPDATED}" == '0' ]]; then
+            dnf check-update 1> /dev/null
+            REPO_UPDATED=1
+        fi
 
-which java 1> /dev/null 2>&1
-[[ "${?}" == '0' ]] || dnf install -y java-latest-openjdk
+        dnf install -y "${REPO_PACKAGE}"
+    fi
+}
 
-which javac 1> /dev/null 2>&1
-[[ "${?}" == '0' ]] || dnf install -y java-latest-openjdk-devel
+# Variable that keeps track if repository is already refreshed.
+REPO_UPDATED=0
+
+# Install dependencies if necassary.
+ENSURE_DEPENDENCY 'wget'
+ENSURE_DEPENDENCY 'grep'
+ENSURE_DEPENDENCY 'unzip'
+ENSURE_DEPENDENCY 'java' 'java-latest-openjdk'
+ENSURE_DEPENDENCY 'javac' 'java-latest-openjdk-devel'
 
 # Download Apache NetBeans archive.
 TMP_DATE="$(date +%s)"
 TMP_FILE="/tmp/apache-netbeans-${TMP_DATE}.zip"
 TMP_PATH="/tmp/apache-netbeans-${TMP_DATE}"
 
-wget "${DOWNLOAD_EU_URL}" -O "${TMP_FILE}"
-
-if [[ "${?}" != '0' ]]; then
-    wget "${DOWNLOAD_US_URL}" -O "${TMP_FILE}"
-fi
-
-if [[ "${?}" != '0' ]]; then
-    echo '> Unable to download required files, exiting.'
-    exit 1
+if ! wget "${DOWNLOAD_EU_URL}" -O "${TMP_FILE}"; then
+    if ! wget "${DOWNLOAD_US_URL}" -O "${TMP_FILE}"; then
+        echo '> Unable to download required files, exiting.'
+        echo '> Aborting.'
+        exit 1
+    fi
 fi
 
 # Extract archive.
@@ -56,10 +66,11 @@ unzip -q "${TMP_FILE}" -d "${TMP_PATH}"
 # Copy files.
 cp -r "${TMP_PATH}/"* "${PACKAGE_POOL}/share/"
 
-for BINARY in $(find "${PACKAGE_POOL}/share/netbeans/bin" -maxdepth 1 -type f -executable)
+while IFS= read -r -d '' BINARY
 do
-    ln -sf "${BINARY}" "${PACKAGE_POOL}/bin/$(basename ${BINARY})"
-done
+    BASENAME=$(basename "${BINARY}")
+    ln -sf "${BINARY}" "${PACKAGE_POOL}/bin/${BASENAME}"
+done < <(find "${PACKAGE_POOL}/share/netbeans/bin" -maxdepth 1 -type f -executable -print0)
 
 # Create desktop entry for application.
 if [[ ! -f "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop" ]]; then
