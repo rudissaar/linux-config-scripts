@@ -15,32 +15,32 @@ ENABLE_SERVICES=1
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
 
 # Variable that keeps track if repository is already refreshed.
-REPO_REFRESHED=0
+REPO_UPDATED=0
 
-# Function that checks if required binary exists and installs it if necessary.
+# Function that checks if required binary exists and installs it if necassary.
 ENSURE_DEPENDENCY () {
     REQUIRED_BINARY=$(basename "${1}")
     REPO_PACKAGE="${2}"
+    [[ -n "${REPO_PACKAGE}" ]] || REPO_PACKAGE="${REQUIRED_BINARY}"
 
-    which "${REQUIRED_BINARY}" 1> /dev/null 2>&1
-
-    if [[ "${?}" != '0' ]]; then
-        if [[ "${REPO_REFRESHED}" == '0' ]]; then
-            dnf update --refresh
-            REPO_REFRESHED=1
+    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+        if [[ "${REPO_UPDATED}" == '0' ]]; then
+            dnf check-update 1> /dev/null
+            REPO_UPDATED=1
         fi
 
         dnf install -y "${REPO_PACKAGE}"
     fi
 }
 
-# Install packages.
-dnf update --refresh
-REPO_REFRESHED=1
+# Install required packages.
+dnf check-update 1> /dev/null
+REPO_UPDATED=1
 
 dnf install -y \
     qemu-kvm \
@@ -63,7 +63,7 @@ if [[ "${POLKIT_NO_PASSWORD}" == '1' ]]; then
     ENSURE_DEPENDENCY 'xmllint' 'libxml2'
     NODES=('allow_any' 'allow_inactive' 'allow_active')
     
-    for NODE in ${NODES[@]}
+    for NODE in "${NODES[@]}"
     do
         xmllint --shell "${POLKIT_FILE}" 1> /dev/null <<EOF
 cd /policyconfig/action[@id='org.libvirt.unix.manage']/defaults/${NODE}
@@ -77,13 +77,12 @@ fi
 if [[ "${ENABLE_IPV4_FORWARDING}" == '1' ]]; then
     echo -n 1 > /proc/sys/net/ipv4/ip_forward
 
-    ENSURE_DEPENDENCY 'sed' 'sed'
-    ENSURE_DEPENDENCY 'grep' 'grep'
+    ENSURE_DEPENDENCY 'sed'
+    ENSURE_DEPENDENCY 'grep'
 
     sed -i '/#net.ipv4.ip_forward=1/s/^#//g' /etc/sysctl.conf
-    grep -Fq 'net.ipv4.ip_forward=1' /etc/sysctl.conf
 
-    if [[ "${?}" != '0' ]]; then
+    if ! grep -Fq 'net.ipv4.ip_forward=1' /etc/sysctl.conf; then
         echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
     fi
 fi
