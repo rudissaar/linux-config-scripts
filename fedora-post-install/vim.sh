@@ -18,7 +18,7 @@ ENSURE_DEPENDENCY () {
 
     if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
         if [[ "${REPO_UPDATED}" == '0' ]]; then
-            dnf check-update
+            dnf check-update 1> /dev/null
             REPO_UPDATED=1
         fi
 
@@ -36,7 +36,7 @@ ENSURE_DEPENDENCY 'awk' 'gawk'
 # Install packages if necessary.
 if ! command -v vim 1> /dev/null; then
     if [[ ${REPO_UPDATED} -eq 0 ]]; then
-        dnf check-update
+        dnf check-update 1> /dev/null
     fi
 
     dnf install -y vim
