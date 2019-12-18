@@ -7,23 +7,23 @@ DOWNLOAD_URL=''http://filebase.trackbase.net/et/full/et260b.x86_full.zip''
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
 
 # Variable that keeps track if repository is already refreshed.
-REPO_REFRESHED=0
+REPO_UPDATED=0
 
-# Function that checks if required binary exists and installs it if necessary.
+# Function that checks if required binary exists and installs it if necassary.
 ENSURE_DEPENDENCY () {
     REQUIRED_BINARY=$(basename "${1}")
     REPO_PACKAGE="${2}"
+    [[ -n "${REPO_PACKAGE}" ]] || REPO_PACKAGE="${REQUIRED_BINARY}"
 
-    which "${REQUIRED_BINARY}" 1> /dev/null 2>&1
-
-    if [[ "${?}" != '0' ]]; then
-        if [[ "${REPO_REFRESHED}" == '0' ]]; then
-            dnf check-update
-            REPO_REFRESHED=1
+    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+        if [[ "${REPO_UPDATED}" == '0' ]]; then
+            dnf check-update 1> /dev/null
+            REPO_UPDATED=1
         fi
 
         dnf install -y "${REPO_PACKAGE}"
@@ -41,10 +41,9 @@ TMP_DATE="$(date +%s)"
 TMP_FILE="/tmp/wet260b-${TMP_DATE}.zip"
 TMP_PATH="/tmp/wet260b-${TMP_DATE}"
 
-wget "${DOWNLOAD_URL}" -O "${TMP_FILE}"
-
-if [[ "${?}" != '0' ]]; then
+if ! wget "${DOWNLOAD_URL}" -O "${TMP_FILE}"; then
     echo '> Unable to download required file, exiting.'
+    echo '> Aborting.'
     exit 1
 fi
 
@@ -52,7 +51,7 @@ fi
 [[ -d "${TMP_PATH}" ]] || mkdir -p "${TMP_PATH}"
 unzip -q "${TMP_FILE}" -d "${TMP_PATH}"
 
-INSTALLER="$(ls "${TMP_PATH}/"*'.run' | head -n 1)"
+INSTALLER="$(find "${TMP_PATH}" -maxdepth 1 -name '*.run' | head -n 1)"
 chmod +x "${INSTALLER}"
 
 # Run installer.
