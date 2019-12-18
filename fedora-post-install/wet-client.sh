@@ -36,6 +36,19 @@ ENSURE_DEPENDENCY 'unzip' 'unzip'
 ENSURE_DEPENDENCY 'modprobe' 'kmod'
 ENSURE_DEPENDENCY 'linux32' 'util-linux'
 
+# Install required 32 bit libraries.
+if [[ "${REPO_UPDATED}" == '0' ]]; then
+    dnf check-update 1> /dev/null
+fi
+
+dnf install -y \
+    glibc.i686 \
+    libglvnd-glx.i686 \
+    libstdc++.i686 \
+    libX11.i686 \
+    libXext.i686 \
+    pulseaudio-libs.i686
+
 # Download Wolfenstein: Enemy Territory archive.
 TMP_DATE="$(date +%s)"
 TMP_FILE="/tmp/wet260b-${TMP_DATE}.zip"
