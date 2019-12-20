@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Script that install vim and generates customized .vimrc file.
+# Script that installs and configures vim editor on current system.
 
 OVERWRITE_USERS_VIMRC=1
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
 
@@ -13,9 +14,7 @@ fi
 pacman --noconfirm -S vim
 
 # Replace vi command with vim.
-grep -Fq 'alias vi=' /etc/bash.bashrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'alias vi=' /etc/bash.bashrc; then
     echo >> /etc/bash.bashrc
     echo "alias vi='vim'" >> /etc/bash.bashrc
 fi
@@ -25,48 +24,36 @@ if [[ ! -f /etc/skel/.vimrc ]]; then
 fi
 
 # Enable syntax.
-grep -Fq 'syntax on' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'syntax on' /etc/skel/.vimrc; then
     echo 'syntax on' >> /etc/skel/.vimrc
 fi
 
 # Display line numbers.
-grep -Fq 'set number' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set number' /etc/skel/.vimrc; then
     echo 'set number' >> /etc/skel/.vimrc
 fi
 
 # Disable visual mode.
-grep -Fq 'set mouse-=a' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set mouse-=a' /etc/skel/.vimrc; then
     echo 'set mouse-=a' >> /etc/skel/.vimrc
 fi
 
-# Sset size of tab.
-grep -Fq 'set tabstop=4' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+# Set size of tab.
+if ! grep -Fq 'set tabstop=4' /etc/skel/.vimrc; then
     echo 'set tabstop=4' >> /etc/skel/.vimrc
 fi
 
 # Use spaces instead of tabs.
-grep -Fq 'set expandtab' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set expandtab' /etc/skel/.vimrc; then
     echo 'set expandtab' >> /etc/skel/.vimrc
 fi
 
 # Set size of indent.
-grep -Fq 'set shiftwidth=4' /etc/skel/.vimrc
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'set shiftwidth=4' /etc/skel/.vimrc; then
     echo 'set shiftwidth=4' >> /etc/skel/.vimrc
 fi
 
-# Copy .vimrc file to every user's home directory.
+# Block that populates user directories with generated .vimrc file.
 if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
     cp /etc/skel/.vimrc "${HOME}/.vimrc"
 
@@ -78,12 +65,13 @@ if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
         for USERNAME in ${USERNAMES}; do
             HOME_DIR=$(eval echo "~${USERNAME}")
 	        cp /etc/skel/.vimrc "${HOME_DIR}/.vimrc"
-            chown ${USERNAME}:${USERNAME} "${HOME_DIR}/.vimrc"
+            chown "${USERNAME}:${USERNAME}" "${HOME_DIR}/.vimrc"
         done
     else
         echo '> Unable to overwrite .vimrc for normal users, missing file: "/etc/login.defs".'
     fi
 fi
 
+# Let user know that script has finished its job.
 echo '> Finished.'
 
