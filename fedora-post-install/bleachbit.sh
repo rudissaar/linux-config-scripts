@@ -12,6 +12,7 @@ DOWNLOAD_URL='https://download.bleachbit.org/bleachbit-3.0-1.1.fc28.noarch.rpm'
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
 
@@ -22,35 +23,34 @@ REPO_REFRESHED=0
 ENSURE_DEPENDENCY () {
     REQUIRED_BINARY=$(basename "${1}")
     REPO_PACKAGE="${2}"
+    [[ -n "${REPO_PACKAGE}" ]] || REPO_PACKAGE="${REQUIRED_BINARY}"
 
-    which "${REQUIRED_BINARY}" 1> /dev/null 2>&1
-
-    if [[ "${?}" != '0' ]]; then
-        if [[ "${REPO_REFRESHED}" == '0' ]]; then
-            dnf update --refresh
-            REPO_REFRESHED=1
+    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+        if [[ "${REPO_UPDATED}" == '0' ]]; then
+            dnf check-update 1> /dev/null
+            REPO_UPDATED=1
         fi
 
         dnf install -y "${REPO_PACKAGE}"
     fi
-} 
+}
+
 
 # Download and install BleachBit package.
-dnf install -y "${DOWNLOAD_URL}"
-
-if [[ "${?}" != '0' ]]; then
+if ! dnf install -y "${DOWNLOAD_URL}"; then
     echo '> Unable to download required file, exiting.'
+    echo '> Aborting.'
     exit 1
 fi
 
 # Check for requirements and install them if necessary.
 ENSURE_DEPENDENCY 'pkexec' 'polkit'
-ENSURE_DEPENDENCY 'python2' 'python2'
-ENSURE_DEPENDENCY 'sed' 'sed'
+ENSURE_DEPENDENCY 'python2'
+ENSURE_DEPENDENCY 'sed'
 
 if [[ "${REPO_REFRESHED}" == '0' ]]; then
-    dnf update --refresh
-    REPO_REFRESHED=1
+    dnf check-update 1> /dev/null
+    REPO_UPDATED=1
 fi
 
 dnf install -y \
@@ -62,7 +62,7 @@ if [[ "${POLKIT_NO_PASSWORD}" == '1' ]]; then
     ENSURE_DEPENDENCY 'xmllint' 'libxml2'
     NODES=('allow_any' 'allow_inactive' 'allow_active')
     
-    for NODE in ${NODES[@]}
+    for NODE in "${NODES[@]}"
     do
         xmllint --shell "${POLKIT_FILE}" 1> /dev/null <<EOF
 cd /policyconfig/action[@id='org.bleachbit']/defaults/${NODE}
