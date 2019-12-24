@@ -7,6 +7,7 @@ OVERWRITE_USERS_XINITRC=1
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
 
@@ -41,7 +42,7 @@ if [[ "${OVERWRITE_USERS_XINITRC}" = '1' ]]; then
         for USERNAME in ${USERNAMES}; do
             HOME_DIR=$(eval echo "~${USERNAME}")
             cp /etc/skel/.xinitrc "${HOME_DIR}/.xinitrc"
-            chown ${USERNAME}:${USERNAME} "${HOME_DIR}/.xinitrc"
+            chown "${USERNAME}":"${USERNAME}" "${HOME_DIR}/.xinitrc"
         done
     else
         echo '> Unable to overwrite .xinitrc for normal users, missing file: "/etc/login.defs".'
@@ -52,5 +53,6 @@ fi
 systemctl enable lightdm
 systemctl start lightdm
 
+# Let user know that script has finished its job.
 echo '> Finished.'
 
