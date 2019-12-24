@@ -53,6 +53,8 @@ fi
 # Remove .bash_history file for normal users.
 if [[ "${CLEAR_HISTORY_FOR_USERS}" == '1' ]]; then
     if [[ -f /etc/login.defs ]]; then
+        ENSURE_DEPENDENCY 'awk' 'gawk'
+
         UID_MIN="$(grep '^UID_MIN' /etc/login.defs)"
         UID_MAX="$(grep '^UID_MAX' /etc/login.defs)"
         USERNAMES="$(awk -F':' -v "min=${UID_MIN##UID_MIN}" -v "max=${UID_MAX##UID_MAX}" '{ if ( $3 >= min && $3 <= max ) print $1}' /etc/passwd)"
