@@ -9,30 +9,37 @@ if [[ "${UID}" != '0' ]]; then
 fi
 
 # Function that checks if required binary exists and installs it if necassary.
-ENSURE_DEPENDENCY () {
+ENSURE_PACKAGE () {
     REQUIRED_BINARY=$(basename "${1}")
     REPO_PACKAGES="${*:2}"
-    [[ -n "${REPO_PACKAGES}" ]] || REPO_PACKAGES="${REQUIRED_BINARY}"
 
-    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
-        if [[ "${REPO_UPDATED}" == '0' ]]; then
-            yum check-update 1> /dev/null
-            REPO_UPDATED=1
+    if [[ "${REQUIRED_BINARY}" != '-' ]]; then
+        [[ -n "${REPO_PACKAGES}" ]] || REPO_PACKAGES="${REQUIRED_BINARY}"
+
+        if command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+            REPO_PACKAGES=''
         fi
-
-        for REPO_PACKAGE in ${REPO_PACKAGES}
-        do
-            yum install -y "${REPO_PACKAGE}"
-        done
     fi
+
+    [[ -n "${REPO_PACKAGES}" ]] || return
+
+    if [[ "${REPO_REFRESHED}" == '0' ]]; then
+       yum check-update 1> /dev/null
+       REPO_REFRESHED=1
+   fi
+
+    for REPO_PACKAGE in ${REPO_PACKAGES}
+    do
+        yum install -y "${REPO_PACKAGE}"
+    done
 }
 
 # Variable that keeps track if repository is already refreshed.
-REPO_UPDATED=0
+REPO_REFRESHED=0
 
 if selinuxenabled; then
     # Install packages if necassary.
-    ENSURE_DEPENDENCY 'sed'
+    ENSURE_PACKAGE 'sed'
 
     # Disable SELinux in runtime.
     echo -n 0 > /sys/fs/selinux/enforce

@@ -28,7 +28,7 @@ ENSURE_PACKAGE () {
     if [[ "${REPO_REFRESHED}" == '0' ]]; then
        yum check-update 1> /dev/null
        REPO_REFRESHED=1
-   fi
+    fi
 
     for REPO_PACKAGE in ${REPO_PACKAGES}
     do
