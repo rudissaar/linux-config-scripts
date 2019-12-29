@@ -55,8 +55,8 @@ ENSURE_PACKAGE 'wget'
 ENSURE_PACKAGE 'grep'
 ENSURE_PACKAGE 'unzip'
 ENSURE_PACKAGE 'find' 'findutils'
-ENSURE_PACKAGE 'java' 'java-latest-openjdk'
-ENSURE_PACKAGE 'javac' 'java-latest-openjdk-devel'
+ENSURE_PACKAGE 'java' 'java-11-openjdk'
+ENSURE_PACKAGE 'javac' 'java-11-openjdk-devel'
 
 # Download Apache NetBeans archive.
 TMP_DATE="$(date +%s)"
