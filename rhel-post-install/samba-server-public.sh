@@ -13,7 +13,7 @@ if [[ "${UID}" != '0' ]]; then
     exit 1
 fi
 
-# Function that checks if required binary exists and installs it if necassary.
+# Function that checks if required binary exists and installs it if necessary.
 ENSURE_PACKAGE () {
     REQUIRED_BINARY=$(basename "${1}")
     REPO_PACKAGES="${*:2}"
@@ -64,7 +64,7 @@ fi
 
 # Install packages.
 ENSURE_PACKAGE 'grep'
-ENSURE_PACKAGE '-' 'samba'
+ENSURE_PACKAGE 'smbd' 'samba'
 
 # Make sure that share directory exists.
 [[ -d "${SHARE_DIR}" ]] || mkdir -p "${SHARE_DIR}"
@@ -99,9 +99,9 @@ EOL
 fi
 
 # Active firewall rules.
-if [[ "${RUN_FIREWALL_RULES}" = '1' ]]; then
+if [[ "${RUN_FIREWALL_RULES}" == '1' ]]; then
     # Make sure firewalld is installed.
-    ENSURE_PACKAGE 'firewalld'
+    ENSURE_PACKAGE 'firewall-cmd' 'firewalld'
 
     # Enable Firewalld service.
     systemctl enable firewalld
