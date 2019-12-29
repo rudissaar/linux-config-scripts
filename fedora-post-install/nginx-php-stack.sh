@@ -8,111 +8,57 @@ EXPOSE_PHP_OFF=1
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
+
+# Function that checks if required binary exists and installs it if necessary.
+ENSURE_PACKAGE () {
+    REQUIRED_BINARY=$(basename "${1}")
+    REPO_PACKAGES="${*:2}"
+
+    if [[ "${REQUIRED_BINARY}" != '-' ]]; then
+        [[ -n "${REPO_PACKAGES}" ]] || REPO_PACKAGES="${REQUIRED_BINARY}"
+
+        if command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+            REPO_PACKAGES=''
+        fi
+    fi
+
+    [[ -n "${REPO_PACKAGES}" ]] || return
+
+    if [[ "${REPO_REFRESHED}" == '0' ]]; then
+        echo '> Refreshing package repository.'
+        dnf check-update 1> /dev/null
+        REPO_REFRESHED=1
+    fi
+
+    for REPO_PACKAGE in ${REPO_PACKAGES}
+    do
+        dnf install -y "${REPO_PACKAGE}"
+    done
+}
 
 # Variable that keeps track if repository is already refreshed.
 REPO_REFRESHED=0
 
-# Install requirements.
-
-# sed.
-which sed 1> /dev/null 2>&1
-
-# Install packages if necessary.
-if [[ "${?}" != '0' ]]; then
-    if [[ "${REPO_REFRESHED}" == '0' ]]; then
-        dnf update --refresh
-        REPO_REFRESHED=1
-    fi
-
-    dnf install -y sed
-fi
-
-# grep.
-which grep 1> /dev/null 2>&1
-
-if [[ "${?}" != '0' ]]; then
-    if [[ "${REPO_REFRESHED}" == '0' ]]; then
-        dnf update --refresh
-        REPO_REFRESHED=1
-    fi
-
-    dnf install -y grep
-fi
-
-# nginx.
-which nginx 1> /dev/null 2>&1
-
-if [[ "${?}" != '0' ]]; then
-    if [[ "${REPO_REFRESHED}" == '0' ]]; then
-        dnf update --refresh
-        REPO_REFRESHED=1
-    fi
-
-    dnf install -y nginx
-fi
-
-# php.
-which php 1> /dev/null 2>&1
-
-if [[ "${?}" != '0' ]]; then
-    if [[ "${REPO_REFRESHED}" == '0' ]]; then
-        dnf update --refresh
-        REPO_REFRESHED=1
-    fi
-
-    dnf install -y \
-        php-cli \
-        php-gd \
-        php-intl \
-        php-json \
-        php-jsonlint \
-        php-mbstring \
-        php-mysqlnd \
-        php-opcache \
-        php-pdo \
-        php-pecl-apcu \
-        php-pecl-apcu-bc \
-        php-pecl-imagick \
-        php-pecl-memcache \
-        php-pgsql \
-        php-process \
-        php-xml
-fi
-
-# php-fpm.
-which php-fpm 1> /dev/null 2>&1
-
-if [[ "${?}" != '0' ]]; then
-    if [[ "${REPO_REFRESHED}" == '0' ]]; then
-        dnf update --refresh
-        REPO_REFRESHED=1
-    fi
-
-    dnf install -y php-fpm
-fi
-
-# composer.
-which composer 1> /dev/null 2>&1
-
-if [[ "${?}" != '0' ]]; then
-    if [[ "${REPO_REFRESHED}" == '0' ]]; then
-        dnf update --refresh
-        REPO_REFRESHED=1
-    fi
-
-    dnf install -y composer
-fi
+# Install packages and dependencies if necessary.
+ENSURE_PACKAGE 'sed'
+ENSURE_PACKAGE 'grep'
+ENSURE_PACKAGE 'nginx'
+ENSURE_PACKAGE 'php-fpm'
+ENSURE_PACKAGE 'composer'
+ENSURE_PACKAGE '-' \
+    'php-cli' 'php-gd' 'php-intl' 'php-json' 'php-jsonlint' 'php-mbstring' 'php-mysqlnd' \
+    'php-opcache' 'php-pdo' 'php-pecl-apcu' 'php-pecl-apcu-bc' 'php-pecl-imagick' 'php-pecl-memcache' \
+    'php-pgsql' 'php-process' 'php-xml'
 
 # Fix configuration.
 sed -i 's/^user = .*$/user = nginx/g' /etc/php-fpm.d/www.conf
 sed -i 's/^group = .*$/group = nginx/g' /etc/php-fpm.d/www.conf
 
 if [[ "${SET_CGI_FIX_PATHINFO_TO_0}" == '1' ]]; then
-    grep -Fq 'cgi.fix_pathinfo=' /etc/php.ini
-
-    if [[ "${?}" != '0' ]]; then
+    if ! grep -Fq 'cgi.fix_pathinfo=' /etc/php.ini; then
         echo 'cgi.fix_pathinfo=0' >> /etc/php.ini
     else
         sed -i -E 's/^;?cgi.fix_pathinfo=.*$/cgi.fix_pathinfo=0/g' /etc/php.ini
@@ -120,9 +66,7 @@ if [[ "${SET_CGI_FIX_PATHINFO_TO_0}" == '1' ]]; then
 fi
 
 if [[ "${EXPOSE_PHP_OFF}" == '1' ]]; then
-    grep -Fq 'expose_php =' /etc/php.ini
-
-    if [[ "${?}" != '0' ]]; then
+    if ! grep -Fq 'expose_php =' /etc/php.ini; then
         echo 'expose_php = Off' >> /etc/php.ini
     else
         sed -i -E 's/^;?expose_php\s?=\s?.*$/expose_php = Off/g' /etc/php.ini
