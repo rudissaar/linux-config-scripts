@@ -28,6 +28,7 @@ you should save script on disk before you execute it.
    * [mate-desktop.sh](./arch-post-install/mate-desktop.sh)
    * [vim.sh](./arch-post-install/vim.sh)
  * [debian-post-install](./debian-post-install)
+   * [apache-netbeans.sh](./debian-post-install/apache-netbeans.sh)
    * [disable-history.sh](./debian-post-install/disable-history.sh)
    * [enable-colours.sh](./debian-post-install/enable-colours.sh)
    * [mariadb.sh](./debian-post-install/mariadb.sh)
