@@ -86,6 +86,8 @@ done < <(find "${PACKAGE_POOL}/share/netbeans/bin" -maxdepth 1 -type f -executab
 
 # Create desktop entry for application.
 if [[ ! -f "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop" ]]; then
+    [[ -d "${PACKAGE_POOL}/share/applications" ]] || mkdir -p "${PACKAGE_POOL}/share/applications"
+
     if [[ "${USE_ICON_FROM_ARCHIVE}" != '0' ]]; then
         ICON="${PACKAGE_POOL}/share/netbeans/nb/netbans.png"
     else
