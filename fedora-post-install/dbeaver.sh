@@ -6,6 +6,7 @@ URL="https://dbeaver.io/files/dbeaver-ce-latest-stable.x86_64.rpm"
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
     echo '> You need to become root to run this script.'
+    echo '> Aborting.'
     exit 1
 fi
 
