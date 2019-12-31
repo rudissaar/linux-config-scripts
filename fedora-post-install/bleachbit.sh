@@ -16,25 +16,35 @@ if [[ "${UID}" != '0' ]]; then
     exit 1
 fi
 
-# Variable that keeps track if repository is already refreshed.
-REPO_REFRESHED=0
-
 # Function that checks if required binary exists and installs it if necessary.
-ENSURE_DEPENDENCY () {
+ENSURE_PACKAGE () {
     REQUIRED_BINARY=$(basename "${1}")
-    REPO_PACKAGE="${2}"
-    [[ -n "${REPO_PACKAGE}" ]] || REPO_PACKAGE="${REQUIRED_BINARY}"
+    REPO_PACKAGES="${*:2}"
 
-    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
-        if [[ "${REPO_UPDATED}" == '0' ]]; then
-            dnf check-update 1> /dev/null
-            REPO_UPDATED=1
+    if [[ "${REQUIRED_BINARY}" != '-' ]]; then
+        [[ -n "${REPO_PACKAGES}" ]] || REPO_PACKAGES="${REQUIRED_BINARY}"
+
+        if command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+            REPO_PACKAGES=''
         fi
-
-        dnf install -y "${REPO_PACKAGE}"
     fi
+
+    [[ -n "${REPO_PACKAGES}" ]] || return
+
+    if [[ "${REPO_REFRESHED}" == '0' ]]; then
+        echo '> Refreshing package repository.'
+        dnf check-update 1> /dev/null
+        REPO_REFRESHED=1
+    fi
+
+    for REPO_PACKAGE in ${REPO_PACKAGES}
+    do
+        dnf install -y "${REPO_PACKAGE}"
+    done
 }
 
+# Variable that keeps track if repository is already refreshed.
+REPO_REFRESHED=0
 
 # Download and install BleachBit package.
 if ! dnf install -y "${DOWNLOAD_URL}"; then
@@ -44,18 +54,11 @@ if ! dnf install -y "${DOWNLOAD_URL}"; then
 fi
 
 # Check for requirements and install them if necessary.
-ENSURE_DEPENDENCY 'pkexec' 'polkit'
-ENSURE_DEPENDENCY 'python2'
-ENSURE_DEPENDENCY 'sed'
-
-if [[ "${REPO_REFRESHED}" == '0' ]]; then
-    dnf check-update 1> /dev/null
-    REPO_UPDATED=1
-fi
-
-dnf install -y \
-    python2-gobject \
-    python2-scandir
+ENSURE_PACKAGE 'pkexec' 'polkit'
+ENSURE_PACKAGE 'python2'
+ENSURE_PACKAGE '-' 'python2-gobject'
+ENSURE_PACKAGE '-' 'python2-scandir'
+ENSURE_PACKAGE 'sed'
 
 # Block that applies no password policy for org.bleachbit directive.
 if [[ "${POLKIT_NO_PASSWORD}" == '1' ]]; then
