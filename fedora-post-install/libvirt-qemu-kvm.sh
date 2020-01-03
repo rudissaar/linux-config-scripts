@@ -19,35 +19,44 @@ if [[ "${UID}" != '0' ]]; then
     exit 1
 fi
 
-# Variable that keeps track if repository is already refreshed.
-REPO_UPDATED=0
-
-# Function that checks if required binary exists and installs it if necassary.
-ENSURE_DEPENDENCY () {
+# Function that checks if required binary exists and installs it if necessary.
+ENSURE_PACKAGE () {
     REQUIRED_BINARY=$(basename "${1}")
-    REPO_PACKAGE="${2}"
-    [[ -n "${REPO_PACKAGE}" ]] || REPO_PACKAGE="${REQUIRED_BINARY}"
+    REPO_PACKAGES="${*:2}"
 
-    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
-        if [[ "${REPO_UPDATED}" == '0' ]]; then
-            dnf check-update 1> /dev/null
-            REPO_UPDATED=1
+    if [[ "${REQUIRED_BINARY}" != '-' ]]; then
+        [[ -n "${REPO_PACKAGES}" ]] || REPO_PACKAGES="${REQUIRED_BINARY}"
+
+        if command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+            REPO_PACKAGES=''
         fi
-
-        dnf install -y "${REPO_PACKAGE}"
     fi
+
+    [[ -n "${REPO_PACKAGES}" ]] || return
+
+    if [[ "${REPO_REFRESHED}" == '0' ]]; then
+        echo '> Refreshing package repository.'
+        dnf check-update 1> /dev/null
+        REPO_REFRESHED=1
+    fi
+
+    for REPO_PACKAGE in ${REPO_PACKAGES}
+    do
+        dnf install -y "${REPO_PACKAGE}"
+    done
 }
 
-# Install required packages.
-dnf check-update 1> /dev/null
-REPO_UPDATED=1
+# Variable that keeps track if repository is already refreshed.
+REPO_REFRESHED=0
 
-dnf install -y \
-    qemu-kvm \
-    libvirt \
-    libvirt-client \
-    virt-install \
-    virt-manager
+# Install required packages.
+
+ENSURE_PACKAGE '-' 'qemu-kvm'
+ENSURE_PACKAGE '-' 'libvirt'
+ENSURE_PACKAGE 'virsh' 'libvirt-client'
+ENSURE_PACKAGE 'virsh' 'libvirt-client'
+ENSURE_PACKAGE 'virt-install'
+ENSURE_PACKAGE 'virt-manager'
 
 # Configuring service.
 if [[ "${ENABLE_SERVICES}" == '1' ]]; then
@@ -60,7 +69,7 @@ fi
 
 # Block that applies no password policy for org.libvirt.unix directive.
 if [[ "${POLKIT_NO_PASSWORD}" == '1' ]]; then
-    ENSURE_DEPENDENCY 'xmllint' 'libxml2'
+    ENSURE_PACKAGE 'xmllint' 'libxml2'
     NODES=('allow_any' 'allow_inactive' 'allow_active')
     
     for NODE in "${NODES[@]}"
@@ -77,8 +86,8 @@ fi
 if [[ "${ENABLE_IPV4_FORWARDING}" == '1' ]]; then
     echo -n 1 > /proc/sys/net/ipv4/ip_forward
 
-    ENSURE_DEPENDENCY 'sed'
-    ENSURE_DEPENDENCY 'grep'
+    ENSURE_PACKAGE 'sed'
+    ENSURE_PACKAGE 'grep'
 
     sed -i '/#net.ipv4.ip_forward=1/s/^#//g' /etc/sysctl.conf
 
