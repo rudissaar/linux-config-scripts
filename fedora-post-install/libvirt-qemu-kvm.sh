@@ -50,7 +50,6 @@ ENSURE_PACKAGE () {
 REPO_REFRESHED=0
 
 # Install required packages.
-
 ENSURE_PACKAGE '-' 'qemu-kvm'
 ENSURE_PACKAGE '-' 'libvirt'
 ENSURE_PACKAGE 'virsh' 'libvirt-client'
