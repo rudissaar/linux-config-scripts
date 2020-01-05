@@ -82,14 +82,19 @@ cp -r /usr/share/easy-rsa/3/* "${OPENVPN_SERVER_DIR}/easy-rsa/"
 cp /usr/share/doc/easy-rsa/vars.example "${OPENVPN_SERVER_DIR}/easy-rsa/vars"
 
 # Edit vars with your default text editor, using vi as fallback.
-if [[ "${EDIT_VARS}" = '1' ]]; then
+if [[ "${EDIT_VARS}" == '1' ]]; then
     ${EDITOR:-vi} "${OPENVPN_SERVER_DIR}/easy-rsa/vars"
 fi
 
 # Generate keys.
-cd "${OPENVPN_SERVER_DIR}/easy-rsa"
-./easyrsa init-pki
-touch "${OPENVPN_SERVER_DIR}/easy-rsa/pki/index.txt.attr"
+if cd "${OPENVPN_SERVER_DIR}/easy-rsa"; then
+    ./easyrsa init-pki
+    touch "${OPENVPN_SERVER_DIR}/easy-rsa/pki/index.txt.attr"
+else
+    echo "Unable to cd into '${OPENVPN_SERVER_DIR}/easy-rsa' directory."
+    echo '> Aborting.'
+    exit 1
+fi
 
 # Generate new Diffie-Hellman key.
 ./easyrsa gen-dh
@@ -105,7 +110,7 @@ mv "${OPENVPN_SERVER_DIR}/easy-rsa/pki/issued/server.crt" "${OPENVPN_SERVER_DIR}
 mv "${OPENVPN_SERVER_DIR}/easy-rsa/pki/private/server.key" "${OPENVPN_SERVER_DIR}"
 
 # Generate crl.pem file.
-if [[ "${CRL_VERIFY}" = '1' ]]; then
+if [[ "${CRL_VERIFY}" == '1' ]]; then
     if [[ ! -f "${OPENVPN_SERVER_DIR}/easy-rsa/pki/crl.pem" ]]; then
         ./easyrsa gen-crl
     fi
@@ -114,7 +119,11 @@ fi
 # Generate TLS Auth key.
 openvpn --genkey --secret "${OPENVPN_SERVER_DIR}/ta.key"
 
-cd - 1> /dev/null
+if ! cd - 1> /dev/null; then
+    echo "Unable to cd into previous directory."
+    echo '> Aborting.'
+    exit 1
+fi
 
 # Change name of the Diffie-Hellman key file.
 sed -i 's/^dh [^.]*\.pem$/dh dh.pem/g' "${OPENVPN_SERVER_DIR}/server.conf"
@@ -169,7 +178,7 @@ fi
 sed -i '/;push "redirect-gateway def1 bypass-dhcp"/s/^;//g' "${OPENVPN_SERVER_DIR}/server.conf"
 
 # Try to fetch nameservers from /etc/resolv.conf
-if [[ "${USE_SAME_NAMESERVERS_AS_HOST}" = '1' ]]; then
+if [[ "${USE_SAME_NAMESERVERS_AS_HOST}" == '1' ]]; then
     NAMESERVERS=($(cat /etc/resolv.conf | grep nameserver | head -n 2 | cut -d ' ' -f 2))
 
     if [[ ${#NAMESERVERS[@]} -lt 1 ]]; then
@@ -192,10 +201,8 @@ sed -i -r \
     "${OPENVPN_SERVER_DIR}/server.conf"
 
 # Enable CRL (Certificate Revocation List).
-if [[ "${CRL_VERIFY}" = '1' ]]; then
-    grep -Fq 'crl-verify' "${OPENVPN_SERVER_DIR}/server.conf"
-
-    if [[ "${?}" != '0' ]]; then
+if [[ "${CRL_VERIFY}" == '1' ]]; then
+    if ! grep -Fq 'crl-verify' "${OPENVPN_SERVER_DIR}/server.conf"; then
         echo -e \
             "\n\n# Use certificate revocation list." \
             >> "${OPENVPN_SERVER_DIR}/server.conf"
@@ -207,7 +214,7 @@ if [[ "${CRL_VERIFY}" = '1' ]]; then
 fi
 
 # Enable LZO compression.
-if [[ "${LZO_COMPRESSION}" = '1' ]]; then
+if [[ "${LZO_COMPRESSION}" == '1' ]]; then
     sed -i '/;comp-lzo/s/^;//g' "${OPENVPN_SERVER_DIR}/server.conf"
 fi
 
@@ -222,15 +229,14 @@ echo -n 1 > /proc/sys/net/ipv4/ip_forward
 sed -i '/#net.ipv4.ip_forward=1/s/^#//g' /etc/sysctl.conf
 
 # Else add it.
-grep -Fq 'net.ipv4.ip_forward=1' /etc/sysctl.conf
-
-if [[ "${?}" != '0' ]]; then
+if ! grep -Fq 'net.ipv4.ip_forward=1' /etc/sysctl.conf; then
     echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 fi
 
 # Identify default network interface.
 if [[ -z "${GATEWAY_INTERFACE}" ]]; then
-    GATEWAY_INTERFACE="$(echo $(route | grep default) | cut -d ' ' -f 8)"
+    GATEWAY_ROUTE="$(route | grep default)"
+    GATEWAY_INTERFACE="$(echo ${GATEWAY_ROUTE} | cut -d ' ' -f 8)"
 
     if [[ -z "${GATEWAY_INTERFACE}" ]]; then
         echo '> Unable to identify default Network Interface, please define it manually.'
@@ -240,7 +246,7 @@ if [[ -z "${GATEWAY_INTERFACE}" ]]; then
 fi
 
 # Active firewall rules.
-if [[ "${RUN_FIREWALL_RULES}" = '1' ]]; then
+if [[ "${RUN_FIREWALL_RULES}" == '1' ]]; then
     systemctl enable firewalld
     systemctl restart firewalld
 
