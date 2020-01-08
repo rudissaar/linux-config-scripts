@@ -62,6 +62,7 @@ you should save script on disk before you execute it.
    * [wet-client.sh](./fedora-post-install/wet-client.sh)
  * [rhel-post-install](./rhel-post-install)
    * [apache-netbeans.sh](./rhel-post-install/apache-netbeans.sh)
+   * [golang.sh](./rhel-post-install/golang.sh)
    * [nfs-server.sh](./rhel-post-install/nfs-server.sh)
    * [rsyslog-server.sh](./rhel-post-install/rsyslog-server.sh)
    * [samba-server-public.sh](./rhel-post-install/samba-server-public.sh)
