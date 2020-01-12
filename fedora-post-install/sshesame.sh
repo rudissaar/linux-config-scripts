@@ -15,8 +15,8 @@ PRIV_KEY_BITS=3072
 PRIV_KEY_TYPE='rsa'
 
 PACKAGE_POOL='/usr/local'
-ENABLE_SERVICES=1
-RUN_FIREWALL_RULES=1
+ENABLE_SERVICES=0
+RUN_FIREWALL_RULES=0
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -164,7 +164,6 @@ else
     echo "firewall-cmd --add-port=${LISTEN_PORT}/tcp"
     echo 'firewall-cmd --runtime-to-permanent'
 fi
-
 
 # Configuring service.
 if [[ "${ENABLE_SERVICES}" == '1' ]]; then

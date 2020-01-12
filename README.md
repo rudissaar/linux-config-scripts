@@ -58,6 +58,7 @@ you should save script on disk before you execute it.
    * [replace-lightdm-with-gdm.sh](./fedora-post-install/replace-lightdm-with-gdm.sh)
    * [samba-server-public.sh](./fedora-post-install/samba-server-public.sh)
    * [selinux-off.sh](./fedora-post-install/selinux-off.sh)
+   * [sshesame.sh](./fedora-post-install/sshesame.sh)
    * [teamspeak3-client.sh](./fedora-post-install/teamspeak3-client.sh)
    * [vim.sh](./fedora-post-install/vim.sh)
    * [wet-client.sh](./fedora-post-install/wet-client.sh)
