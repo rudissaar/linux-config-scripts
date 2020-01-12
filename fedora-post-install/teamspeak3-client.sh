@@ -93,7 +93,7 @@ RUN_INSTALL_FOR_USER () {
 
 if [[ -n "${INSTALL_FOR_EVERYBODY}" ]]; then
     if [[ "${UID}" != '0' ]]; then
-        echo '> You need root user permissions to install TeamSpeak 3 Client for everbody.'
+        echo '> You need root user permissions to install TeamSpeak3 Client for everbody.'
         echo '> Aborting.'
         exit 1
     fi
