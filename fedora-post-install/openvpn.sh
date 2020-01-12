@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2046
+# shellcheck disable=SC2086
 # Script that installs and configures OpenVPN server on current system.
 
 OPENVPN_SERVER_DIR='/etc/openvpn/server'
@@ -179,7 +181,7 @@ sed -i '/;push "redirect-gateway def1 bypass-dhcp"/s/^;//g' "${OPENVPN_SERVER_DI
 
 # Try to fetch nameservers from /etc/resolv.conf
 if [[ "${USE_SAME_NAMESERVERS_AS_HOST}" == '1' ]]; then
-    NAMESERVERS=($(cat /etc/resolv.conf | grep nameserver | head -n 2 | cut -d ' ' -f 2))
+    mapfile -t NAMESERVERS < <(grep nameserver /etc/resolv.conf | head -n 2 | cut -d ' ' -f 2)
 
     if [[ ${#NAMESERVERS[@]} -lt 1 ]]; then
         echo "> Unable to identify Host's Nameservers, using fallback."
