@@ -1,8 +1,21 @@
 #!/usr/bin/env bash
 # Script that installs sshesame, a fake SSH server that lets everyone in and logs their activity on current system.
 
+LISTEN_ADDRESS='0.0.0.0'
+LISTEN_PORT=2022
+SERVER_VESION='SSH-2.0-OpenSSH_8.1'
+JSON_LOGGING=0
+
+SSHESAME_USER='sshesame'
+SSHESAME_UID=972
+SSHESAME_GID=972
+
+GENERATE_AND_USE_PRIV_KEY=1
+PRIV_KEY_BITS=3072
+PRIV_KEY_TYPE='rsa'
+
 PACKAGE_POOL='/usr/local'
-ENABLE_SERVICES=1
+ENABLE_SERVICES=0
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -43,6 +56,7 @@ REPO_REFRESHED=0
 
 # Install required packages.
 ENSURE_PACKAGE 'go' 'golang'
+ENSURE_PACKAGE 'ssh-keygen' 'openssh'
 
 # Temporary change GOPATH environment variable.
 ORIGINAL_GOPATH=$(go env GOPATH)
@@ -57,27 +71,59 @@ go get -u github.com/jaksi/sshesame
 ln -sf "${GOPATH}/bin/sshesame" "${PACKAGE_POOL}/sbin/sshesame"
 
 # Create file and directory for configuration.
-[[ -d /etc/sshesame ]] || mkdir -p /etc/sshesame
-[[ -f /etc/sshesame/sshesame.conf ]] && mv /etc/sshesame/sshesame.conf /etc/sshesame/sshesame.conf.bak
+ETC_PATH='/etc/sshesame'
 
-cat > '/etc/sshesame/sshesame.conf' <<EOL
--listen_address 0.0.0.0
+[[ -d "${ETC_PATH}" ]] || mkdir -p "${ETC_PATH}"
+[[ -f "${ETC_PATH}/sshesame.conf" ]] && mv "${ETC_PATH}/sshesame.conf" "${ETC_PATH}/sshesame.conf.bak"
+
+# Create user for sshesame service.
+if ! getent passwd "${SSHESAME_USER}" 1> /dev/null 2>&1; then
+    groupadd \
+        --gid ${SSHESAME_GID} \
+        "${SSHESAME_USER}"
+
+    useradd \
+        --uid ${SSHESAME_UID} \
+        --gid ${SSHESAME_GID} \
+        --no-create-home \
+        --home-dir "${ETC_PATH}" \
+        --comment 'Fake SSH Server' \
+        --shell '/sbin/nologin ' \
+        "${SSHESAME_USER}"
+fi
+
+# Address and port.
+cat > /etc/sshesame/sshesame.conf <<EOL
+-listen_address ${LISTEN_ADDRESS}
+-port ${LISTEN_PORT}
+-server_version '${SERVER_VESION}'
 EOL
+
+# JSON logging.
+[[ "${JSON_LOGGING}" == '1' ]] && echo '-json_logging' >> "${ETC_PATH}/sshesame.conf"
+
+# Private key.
+if [[ "${GENERATE_AND_USE_PRIV_KEY}" == 1 ]]; then
+    [[ -f "${ETC_PATH}/host.key" ]] && rm "${ETC_PATH}/host.key"
+    ssh-keygen -b ${PRIV_KEY_BITS} -t "${PRIV_KEY_TYPE}" -f "${ETC_PATH}/host.key" -q -N ''
+    chown "${SSHESAME_USER}":${SSHESAME_USER} "${ETC_PATH}/host.key"
+    [[ -f "${ETC_PATH}/host.key.pub" ]] && rm "${ETC_PATH}/host.key.pub"
+    echo "-host_key ${ETC_PATH}/host.key" >> "${ETC_PATH}/sshesame.conf"
+fi
 
 # Create systemd service file for sshesame.
 [[ -d /usr/local/lib/systemd/system ]] || mkdir -p /usr/local/lib/systemd/system
 
-if [[ ! -f /usr/local/lib/systemd/system/sshesame.service ]]; then
-    cat > /usr/local/lib/systemd/system/sshesame.service <<EOL
+cat > /usr/local/lib/systemd/system/sshesame.service <<EOL
 [Unit]
 Description=A fake SSH server that lets everyone in and logs their activity.
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]
-User=nobody
-Group=nobody
+User=${SSHESAME_USER}
+Group=${SSHESAME_USER}
 Type=simple
-ExecStart=${PACKAGE_POOL}/sbin/sshesame $(paste -d ' ' -s /etc/sshesame.conf)
+ExecStart=${PACKAGE_POOL}/sbin/sshesame $(paste -d ' ' -s ${ETC_PATH}/sshesame.conf)
 ExecReload=/bin/kill -s HUP $MAINPID
 KillSignal=SIGQUIT
 TimeoutStopSec=5
@@ -90,7 +136,6 @@ EOL
 
 # Reload systemd daemon.
 systemctl daemon-reload
-fi
 
 # Restore GOPATH environment variable.
 export GOPATH="${ORIGINAL_GOPATH}"
