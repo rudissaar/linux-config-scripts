@@ -15,7 +15,8 @@ PRIV_KEY_BITS=3072
 PRIV_KEY_TYPE='rsa'
 
 PACKAGE_POOL='/usr/local'
-ENABLE_SERVICES=0
+ENABLE_SERVICES=1
+RUN_FIREWALL_RULES=1
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -57,6 +58,7 @@ REPO_REFRESHED=0
 # Install required packages.
 ENSURE_PACKAGE 'go' 'golang'
 ENSURE_PACKAGE 'ssh-keygen' 'openssh'
+ENSURE_PACKAGE 'firewall-cmd' 'firewalld'
 
 # Temporary change GOPATH environment variable.
 ORIGINAL_GOPATH=$(go env GOPATH)
@@ -127,6 +129,7 @@ KillSignal=SIGQUIT
 TimeoutStopSec=5
 KillMode=mixed
 PrivateTmp=true
+Restart=Always
 StandardOutput=file:/var/log/sshesame/access.log
 StandardError=file:/var/log/sshesame/error.log
 
@@ -138,6 +141,7 @@ EOL
 [[ -d /var/log/sshesame ]] || mkdir -p /var/log/sshesame
 touch /var/log/sshesame/access.log
 touch /var/log/sshesame/error.log
+
 chown root:"${SSHESAME_USER}" /var/log/sshesame/*.log
 chmod 660 /var/log/sshesame/*.log
 chmod +t /var/log/sshesame/*.log
@@ -147,6 +151,20 @@ systemctl daemon-reload
 
 # Restore GOPATH environment variable.
 export GOPATH="${ORIGINAL_GOPATH}"
+
+# Active firewall rules.
+if [[ "${RUN_FIREWALL_RULES}" == '1' ]]; then
+    systemctl enable firewalld
+    systemctl restart firewalld
+
+    firewall-cmd --add-port=${LISTEN_PORT}/tcp 1> /dev/null
+    firewall-cmd --runtime-to-permanent 1> /dev/null
+else
+    echo '> In order to complete installation you have to apply firewall rules:'
+    echo "firewall-cmd --add-port=${LISTEN_PORT}/tcp"
+    echo 'firewall-cmd --runtime-to-permanent'
+fi
+
 
 # Configuring service.
 if [[ "${ENABLE_SERVICES}" == '1' ]]; then
