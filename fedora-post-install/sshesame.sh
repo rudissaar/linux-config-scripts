@@ -72,9 +72,7 @@ ln -sf "${GOPATH}/bin/sshesame" "${PACKAGE_POOL}/sbin/sshesame"
 
 # Create file and directory for configuration.
 ETC_PATH='/etc/sshesame'
-
 [[ -d "${ETC_PATH}" ]] || mkdir -p "${ETC_PATH}"
-[[ -f "${ETC_PATH}/sshesame.conf" ]] && mv "${ETC_PATH}/sshesame.conf" "${ETC_PATH}/sshesame.conf.bak"
 
 # Create user for sshesame service.
 if ! getent passwd "${SSHESAME_USER}" 1> /dev/null 2>&1; then
@@ -129,10 +127,20 @@ KillSignal=SIGQUIT
 TimeoutStopSec=5
 KillMode=mixed
 PrivateTmp=true
+StandardOutput=file:/var/log/sshesame/access.log
+StandardError=file:/var/log/sshesame/error.log
 
 [Install]
 WantedBy=multi-user.target
 EOL
+
+# Create file for logging.
+[[ -d /var/log/sshesame ]] || mkdir -p /var/log/sshesame
+touch /var/log/sshesame/access.log
+touch /var/log/sshesame/error.log
+chown root:"${SSHESAME_USER}" /var/log/sshesame/*.log
+chmod 660 /var/log/sshesame/*.log
+chmod +t /var/log/sshesame/*.log
 
 # Reload systemd daemon.
 systemctl daemon-reload
