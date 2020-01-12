@@ -40,7 +40,7 @@ ENSURE_PACKAGE () {
 # Variable that keeps track if repository is already refreshed.
 REPO_REFRESHED=0
 
-# Install packages and dependencies if necassary.
+# Install packages and dependencies if necessary.
 ENSURE_PACKAGE 'grep'
 ENSURE_PACKAGE 'awk' 'gawk'
 ENSURE_PACKAGE 'vim'

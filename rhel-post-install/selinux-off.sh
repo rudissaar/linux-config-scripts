@@ -39,7 +39,7 @@ ENSURE_PACKAGE () {
 REPO_REFRESHED=0
 
 if selinuxenabled; then
-    # Install packages if necassary.
+    # Install packages if necessary.
     ENSURE_PACKAGE 'sed'
 
     # Disable SELinux in runtime.
