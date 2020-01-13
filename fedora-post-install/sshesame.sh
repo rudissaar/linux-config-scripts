@@ -130,21 +130,17 @@ TimeoutStopSec=5
 KillMode=mixed
 PrivateTmp=true
 Restart=Always
-StandardOutput=file:/var/log/sshesame/access.log
-StandardError=file:/var/log/sshesame/error.log
+StandardOutput=file:/var/log/sshesame.log
 
 [Install]
 WantedBy=multi-user.target
 EOL
 
 # Create file for logging.
-[[ -d /var/log/sshesame ]] || mkdir -p /var/log/sshesame
-touch /var/log/sshesame/access.log
-touch /var/log/sshesame/error.log
-
-chown root:"${SSHESAME_USER}" /var/log/sshesame/*.log
-chmod 660 /var/log/sshesame/*.log
-chmod +t /var/log/sshesame/*.log
+touch /var/log/sshesame.log
+chown root:"${SSHESAME_USER}" /var/log/sshesame.log
+chmod 660 /var/log/sshesame.log
+chmod +t /var/log/sshesame.log
 
 # Reload systemd daemon.
 systemctl daemon-reload
