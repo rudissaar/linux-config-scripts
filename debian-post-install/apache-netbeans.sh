@@ -37,7 +37,7 @@ ENSURE_PACKAGE () {
 
     if [[ "${REPO_REFRESHED}" == '0' ]]; then
         echo '> Refreshing package repository.'
-        apt-cache update 1> /dev/null
+        apt-get update 1> /dev/null
         REPO_REFRESHED=1
     fi
 
