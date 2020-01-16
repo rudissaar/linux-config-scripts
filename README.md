@@ -61,7 +61,6 @@ you should save script on disk before you execute it.
    * [sshesame.sh](./fedora-post-install/sshesame.sh)
    * [teamspeak3-client.sh](./fedora-post-install/teamspeak3-client.sh)
    * [vim.sh](./fedora-post-install/vim.sh)
-   * [wet-client.sh](./fedora-post-install/wet-client.sh)
  * [rhel-post-install](./rhel-post-install)
    * [apache-netbeans.sh](./rhel-post-install/apache-netbeans.sh)
    * [golang.sh](./rhel-post-install/golang.sh)
