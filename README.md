@@ -40,6 +40,7 @@ you should save script on disk before you execute it.
    * [adobe-flash.sh](./fedora-post-install/adobe-flash.sh)
    * [apache-netbeans.sh](./fedora-post-install/apache-netbeans.sh)
    * [bleachbit.sh](./fedora-post-install/bleachbit.sh)
+   * [build-nginx-with-pagespeed.sh](./fedora-post-install/build-nginx-with-pagespeed.sh)
    * [fasm.sh](./fedora-post-install/fasm.sh)
    * [grub-efi.sh](./fedora-post-install/grub-efi.sh)
    * [hla.sh](./fedora-post-install/hla.sh)

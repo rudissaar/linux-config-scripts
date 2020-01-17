@@ -99,7 +99,7 @@ tar -xzf "${TMP_PAGESPEED_FILE}" -C "${TMP_PAGESPEED_PATH}"
 mv "${TMP_PAGESPEED_PATH}/"*pagespeed*/* "${TMP_PAGESPEED_PATH}"
 
 # Download required library for pagespeed module.
-cd "${TMP_PAGESPEED_PATH}"
+cd "${TMP_PAGESPEED_PATH}" || exit 2
 
 if ! wget "${PSOL_URL}" -O './psol.tar.gz'; then
     echo '> Unable to download required files, exiting.'
@@ -111,10 +111,10 @@ fi
 # Extract PSOL archive.
 tar -xzf 'psol.tar.gz'
 
-cd - 1> /dev/null 2>&1
+cd - 1> /dev/null 2>&1 || exit 2
 
 # Configure nginx build.
-cd "${TMP_NGINX_PATH}"
+cd "${TMP_NGINX_PATH}" || exit 2
 
 ./configure \
     --prefix=${PACKAGE_POOL}/share/nginx-local \
@@ -133,12 +133,12 @@ cd "${TMP_NGINX_PATH}"
     --with-stream=dynamic \
     --with-stream_ssl_module \
     --with-mail=dynamic \
-    --add-module=${TMP_PAGESPEED_PATH}
+    --add-module="${TMP_PAGESPEED_PATH}"
 
 # Build.
 make && make modules && make install clean
 
-cd - 1> /dev/null 2>&1
+cd - 1> /dev/null 2>&1 || exit 2
 
 # Create systemd service file for nginx.
 [[ -d /usr/local/lib/systemd/system ]] || mkdir -p /usr/local/lib/systemd/system
@@ -151,12 +151,12 @@ After=network.target remote-fs.target nss-lookup.target
 Type=forking
 PIDFile=/run/nginx-local.pid
 # Nginx will fail to start if /run/nginx-local.pid already exists but has the wrong
-# SELinux context. This might happen when running `nginx-local -t` from the cmdline.
+# SELinux context. This might happen when running \`nginx-local -t\` from the cmdline.
 # https://bugzilla.redhat.com/show_bug.cgi?id=1268621
 ExecStartPre=/usr/bin/rm -f /run/nginx-local.pid
 ExecStartPre=${PACKAGE_POOL}/sbin/nginx-local -t
 ExecStart=${PACKAGE_POOL}/sbin/nginx-local
-ExecReload=/bin/kill -s HUP $MAINPID
+ExecReload=/bin/kill -s HUP \$MAINPID
 KillSignal=SIGQUIT
 TimeoutStopSec=5
 KillMode=mixed
