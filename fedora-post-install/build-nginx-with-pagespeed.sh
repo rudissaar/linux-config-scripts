@@ -116,9 +116,12 @@ cd - 1> /dev/null 2>&1
 cd "${TMP_NGINX_PATH}"
 
 ./configure \
-    --sbin-path=${PACKAGE_POOL}/sbin/nginx \
-    --conf-path=${PACKAGE_POOL}/nginx/nginx.conf \
-    --pid-path=${PACKAGE_POOL}/nginx/nginx.pid \
+    --prefix=${PACKAGE_POOL}/share/nginx-local \
+    --sbin-path=${PACKAGE_POOL}/sbin/nginx-local \
+    --conf-path=${PACKAGE_POOL}/etc/nginx-local/nginx-local.conf \
+    --pid-path=/run/nginx-local.pid \
+    --lock-path=/run/nginx-local.lock \
+    --error-log-path=/var/log/nginx-local/error.log \
     --with-threads \
     --with-http_ssl_module \
     --with-http_v2_module \
