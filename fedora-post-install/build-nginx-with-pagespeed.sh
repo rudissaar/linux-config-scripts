@@ -8,6 +8,7 @@ NGINX_PAGESPEED_URL='https://github.com/apache/incubator-pagespeed-ngx/archive/v
 PSOL_URL='https://dl.google.com/dl/page-speed/psol/1.13.35.2-x64.tar.gz'
 
 PACKAGE_POOL='/usr/local'
+ENABLE_SERVICES=0
 
 # You need root permissions to run this script.
 if [[ "${UID}" != '0' ]]; then
@@ -138,6 +139,44 @@ cd "${TMP_NGINX_PATH}"
 make && make modules && make install clean
 
 cd - 1> /dev/null 2>&1
+
+# Create systemd service file for nginx.
+[[ -d /usr/local/lib/systemd/system ]] || mkdir -p /usr/local/lib/systemd/system
+cat > /usr/local/lib/systemd/system/nginx-local.service <<EOL
+[Unit]
+Description=The nginx HTTP and reverse proxy server
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/run/nginx-local.pid
+# Nginx will fail to start if /run/nginx-local.pid already exists but has the wrong
+# SELinux context. This might happen when running `nginx-local -t` from the cmdline.
+# https://bugzilla.redhat.com/show_bug.cgi?id=1268621
+ExecStartPre=/usr/bin/rm -f /run/nginx-local.pid
+ExecStartPre=${PACKAGE_POOL}/sbin/nginx-local -t
+ExecStart=${PACKAGE_POOL}/sbin/nginx-local
+ExecReload=/bin/kill -s HUP $MAINPID
+KillSignal=SIGQUIT
+TimeoutStopSec=5
+KillMode=mixed
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+# Reload systemd service.
+systemctl daemon-reload
+
+# Configuring service.
+if [[ "${ENABLE_SERVICES}" == '1' ]]; then
+    systemctl enable nginx-local
+    systemctl restart lnginx-local
+else
+    systemctl disable nginx-local
+    systemctl stop nginx-local
+fi
 
 # Cleanup.
 CLEANUP
