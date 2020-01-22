@@ -10,37 +10,40 @@ if [[ "${UID}" != '0' ]]; then
     exit 1
 fi
 
-# Function that checks if required binary exists and installs it if necassary.
-ENSURE_DEPENDENCY () {
+# Function that checks if required binary exists and installs it if necessary.
+ENSURE_PACKAGE () {
     REQUIRED_BINARY=$(basename "${1}")
-    REPO_PACKAGE="${2}"
-    [[ -n "${REPO_PACKAGE}" ]] || REPO_PACKAGE="${REQUIRED_BINARY}"
+    REPO_PACKAGES="${*:2}"
 
-    if ! command -v "${REQUIRED_BINARY}" 1> /dev/null; then
-        if [[ "${REPO_UPDATED}" == '0' ]]; then
-            dnf check-update 1> /dev/null
-            REPO_UPDATED=1
+    if [[ "${REQUIRED_BINARY}" != '-' ]]; then
+        [[ -n "${REPO_PACKAGES}" ]] || REPO_PACKAGES="${REQUIRED_BINARY}"
+
+        if command -v "${REQUIRED_BINARY}" 1> /dev/null; then
+            REPO_PACKAGES=''
         fi
-
-        dnf install -y "${REPO_PACKAGE}"
     fi
+
+    [[ -n "${REPO_PACKAGES}" ]] || return
+
+    if [[ "${REPO_REFRESHED}" == '0' ]]; then
+        echo '> Refreshing package repository.'
+        dnf check-update 1> /dev/null
+        REPO_REFRESHED=1
+    fi
+
+    for REPO_PACKAGE in ${REPO_PACKAGES}
+    do
+        dnf install -y "${REPO_PACKAGE}"
+    done
 }
 
 # Variable that keeps track if repository is already refreshed.
-REPO_UPDATED=0
+REPO_REFRESHED=0
 
-# Install dependencies if necassary.
-ENSURE_DEPENDENCY 'grep'
-ENSURE_DEPENDENCY 'awk' 'gawk'
-
-# Install packages if necessary.
-if ! command -v vim 1> /dev/null; then
-    if [[ ${REPO_UPDATED} -eq 0 ]]; then
-        dnf check-update 1> /dev/null
-    fi
-
-    dnf install -y vim
-fi
+# Install dependencies if necessary.
+ENSURE_PACKAGE 'vim'
+ENSURE_PACKAGE 'grep'
+ENSURE_PACKAGE 'awk' 'gawk'
 
 # Replace vi command with vim.
 if ! grep -Fq 'alias vi=' /etc/bashrc; then
@@ -94,7 +97,7 @@ if ! grep -Fq 'set shiftwidth=4' /etc/skel/.vimrc; then
 fi
 
 # Block that populates user directories with generated .vimrc file.
-if [[ "${OVERWRITE_USERS_VIMRC}" = '1' ]]; then
+if [[ "${OVERWRITE_USERS_VIMRC}" == '1' ]]; then
     cp /etc/skel/.vimrc "${HOME}/.vimrc"
 
     if [[ -f /etc/login.defs ]]; then
