@@ -116,14 +116,14 @@ fi
 
 cat > /usr/local/lib/systemd/system/sshesame.service <<EOL
 [Unit]
-Description=A fake SSH server that lets everyone in and logs their activity.
+Description=A fake SSH server that lets everyone in and logs their activity
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]
 User=${SSHESAME_USER}
 Group=${SSHESAME_USER}
 Type=simple
-ExecStart=${PACKAGE_POOL}/sbin/sshesame $(paste -d ' ' -s ${ETC_PATH}/sshesame.conf)
+ExecStart=${PACKAGE_POOL}/sbin/sshesame \$(paste -d ' ' -s ${ETC_PATH}/sshesame.conf)
 ExecReload=/bin/kill -s HUP $MAINPID
 KillSignal=SIGQUIT
 TimeoutStopSec=5
