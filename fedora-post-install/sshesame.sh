@@ -142,6 +142,30 @@ chown root:"${SSHESAME_USER}" /var/log/sshesame.log
 chmod 660 /var/log/sshesame.log
 chmod +t /var/log/sshesame.log
 
+# Create a file that can be used for uninstalling.
+[[ -d "${PACKAGE_POOL}/share/sshesame" ]] || mkdir -p "${PACKAGE_POOL}/share/sshesame"
+
+cat > "${PACKAGE_POOL}/share/sshesame/uninstall.txt" <<EOL
+systemctl stop sshesame
+systemctl disable sshesame
+rm /usr/local/lib/systemd/system/sshesame.service
+userdel sshesame
+groupdel sshesame
+rm "${PACKAGE_POOL}/sbin/sshesame"
+rm "${GOPATH}/bin/sshesame"
+rm -r "${GOPATH}/src/github.com/jaksi/sshesame"
+rmdir "${GOPATH}/src/github.com/jaksi" 2> /dev/null
+rmdir "${GOPATH}/src/github.com" 2> /dev/null
+rmdir "${GOPATH}/src" 2> /dev/null
+rm "${ETC_PATH}/sshesame.conf"
+rm "${ETC_PATH}/host.key"
+rmdir "${ETC_PATH}" 2> /dev/null
+rm -f /var/log/sshesame.log
+rm ${PACKAGE_POOL}/sbin/sshesame
+rm "${PACKAGE_POOL}/share/sshesame/uninstall.txt"
+rmdir "${PACKAGE_POOL}/share/sshesame" 2> /dev/null
+EOL
+
 # Reload systemd daemon.
 systemctl daemon-reload
 
