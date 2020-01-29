@@ -151,6 +151,7 @@ systemctl disable sshesame
 rm /usr/local/lib/systemd/system/sshesame.service
 userdel sshesame
 groupdel sshesame
+rm /var/spool/mail/sshesame
 rm "${PACKAGE_POOL}/sbin/sshesame"
 rm "${GOPATH}/bin/sshesame"
 rm -r "${GOPATH}/src/github.com/jaksi/sshesame"
