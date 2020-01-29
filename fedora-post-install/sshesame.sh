@@ -70,7 +70,17 @@ go get -u github.com/jaksi/sshesame
 
 # Link sshesame binary.
 [[ -d "${PACKAGE_POOL}/sbin" ]] || "${PACKAGE_POOL}/sbin"
-ln -sf "${GOPATH}/bin/sshesame" "${PACKAGE_POOL}/sbin/sshesame"
+
+# Create script that reads parameters from file.
+cat > "${PACKAGE_POOL}/sbin/sshesame" <<EOL
+#!/bin/sh
+
+${GOPATH}/bin/sshesame \$(paste -d ' ' -s ${ETC_PATH}/sshesame.conf)
+
+EOL
+
+# Fix script permissions.
+chmod +x "${PACKAGE_POOL}/sbin/sshesame"
 
 # Create file and directory for configuration.
 ETC_PATH='/etc/sshesame'
@@ -123,13 +133,13 @@ After=network.target remote-fs.target nss-lookup.target
 User=${SSHESAME_USER}
 Group=${SSHESAME_USER}
 Type=simple
-ExecStart=${PACKAGE_POOL}/sbin/sshesame \$(paste -d ' ' -s ${ETC_PATH}/sshesame.conf)
+ExecStart=/bin/sh ${PACKAGE_POOL}/sbin/sshesame
 ExecReload=/bin/kill -s HUP $MAINPID
 KillSignal=SIGQUIT
 TimeoutStopSec=5
 KillMode=mixed
 PrivateTmp=true
-Restart=Always
+Restart=always
 StandardOutput=file:/var/log/sshesame.log
 
 [Install]
