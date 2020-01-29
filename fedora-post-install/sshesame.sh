@@ -68,6 +68,10 @@ export GOPATH="${PACKAGE_POOL}/share/go"
 # Install sshesame from source.
 go get -u github.com/jaksi/sshesame
 
+# Create file and directory for configuration.
+ETC_PATH='/etc/sshesame'
+[[ -d "${ETC_PATH}" ]] || mkdir -p "${ETC_PATH}"
+
 # Link sshesame binary.
 [[ -d "${PACKAGE_POOL}/sbin" ]] || "${PACKAGE_POOL}/sbin"
 
@@ -81,10 +85,6 @@ EOL
 
 # Fix script permissions.
 chmod +x "${PACKAGE_POOL}/sbin/sshesame"
-
-# Create file and directory for configuration.
-ETC_PATH='/etc/sshesame'
-[[ -d "${ETC_PATH}" ]] || mkdir -p "${ETC_PATH}"
 
 # Create user for sshesame service.
 if ! getent passwd "${SSHESAME_USER}" 1> /dev/null 2>&1; then
@@ -158,22 +158,22 @@ chmod +t /var/log/sshesame.log
 cat > "${PACKAGE_POOL}/share/sshesame/uninstall.txt" <<EOL
 systemctl stop sshesame
 systemctl disable sshesame
-rm /usr/local/lib/systemd/system/sshesame.service
+rm -f /usr/local/lib/systemd/system/sshesame.service
 userdel sshesame
 groupdel sshesame
-rm /var/spool/mail/sshesame
-rm "${PACKAGE_POOL}/sbin/sshesame"
-rm "${GOPATH}/bin/sshesame"
-rm -r "${GOPATH}/src/github.com/jaksi/sshesame"
+rm -f /var/spool/mail/sshesame
+rm -f "${PACKAGE_POOL}/sbin/sshesame"
+rm -f "${GOPATH}/bin/sshesame"
+rm -rf "${GOPATH}/src/github.com/jaksi/sshesame"
 rmdir "${GOPATH}/src/github.com/jaksi" 2> /dev/null
 rmdir "${GOPATH}/src/github.com" 2> /dev/null
 rmdir "${GOPATH}/src" 2> /dev/null
-rm "${ETC_PATH}/sshesame.conf"
-rm "${ETC_PATH}/host.key"
+rm -f "${ETC_PATH}/sshesame.conf"
+rm -f "${ETC_PATH}/host.key"
 rmdir "${ETC_PATH}" 2> /dev/null
 rm -f /var/log/sshesame.log
-rm ${PACKAGE_POOL}/sbin/sshesame
-rm "${PACKAGE_POOL}/share/sshesame/uninstall.txt"
+rm -f ${PACKAGE_POOL}/sbin/sshesame
+rm -f "${PACKAGE_POOL}/share/sshesame/uninstall.txt"
 rmdir "${PACKAGE_POOL}/share/sshesame" 2> /dev/null
 EOL
 
