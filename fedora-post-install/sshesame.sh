@@ -106,7 +106,7 @@ fi
 cat > /etc/sshesame/sshesame.conf <<EOL
 -listen_address ${LISTEN_ADDRESS}
 -port ${LISTEN_PORT}
--server_version '${SERVER_VESION}'
+-server_version ${SERVER_VESION}
 EOL
 
 # JSON logging.
@@ -160,7 +160,7 @@ systemctl stop sshesame
 systemctl disable sshesame
 rm -f /usr/local/lib/systemd/system/sshesame.service
 userdel sshesame
-groupdel sshesame
+groupdel sshesame 2> /dev/null
 rm -f /var/spool/mail/sshesame
 rm -f "${PACKAGE_POOL}/sbin/sshesame"
 rm -f "${GOPATH}/bin/sshesame"
