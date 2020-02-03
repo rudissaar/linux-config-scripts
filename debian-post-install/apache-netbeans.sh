@@ -109,6 +109,12 @@ StartupWMClass=NetBeans IDE ${VERSION}
 EOL
 fi
 
+# Create a file that can be used for uninstalling.
+cat > "${PACKAGE_POOL}/share/netbeans/uninstall.txt" <<EOL
+rm -rf "${PACKAGE_POOL}/share/netbeans"
+rm -f "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop"
+EOL
+
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
 
