@@ -84,6 +84,9 @@ chown root \
     /var/lib/php/session \
     /var/lib/php/wsdlcache
 
+usermod -G apache nginx
+usermod -G nginx apache
+
 # Configuring services.
 if [[ "${ENABLE_SERVICES}" == '1' ]]; then
     systemctl enable nginx
