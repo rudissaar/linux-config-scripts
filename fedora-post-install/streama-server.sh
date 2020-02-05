@@ -62,6 +62,13 @@ fi
 [[ -d "${PACKAGE_POOL}/share/streama" ]] || mkdir -p "${PACKAGE_POOL}/share/streama"
 mv "${TMP_FILE}" "${PACKAGE_POOL}/share/streama/streama.jar"
 
+# Create a file that can be used for uninstalling.
+cat > "${PACKAGE_POOL}/share/streama/uninstall.txt" <<EOL
+rm -f "${PACKAGE_POOL}/share/streama/streama.jar"
+rm -f "${PACKAGE_POOL}/share/streama/uninstall.txt"
+rmdir "${PACKAGE_POOL}/share/streama" 2> /dev/null
+EOL
+
 # Let user know that script has finished its job.
 echo '> Finished.'
 
