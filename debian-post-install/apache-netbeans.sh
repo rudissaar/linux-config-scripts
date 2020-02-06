@@ -3,7 +3,7 @@
 
 PACKAGE_POOL="/usr/local"
 VERSION='11.2'
-USE_ICON_FROM_ARCHIVE=0
+USE_ICON_FROM_ARCHIVE=1
 
 if [[ "${VERSION}" == '11.0' ]]; then
     DOWNLOAD_EU_URL="https://www-eu.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-${VERSION}/incubating-netbeans-${VERSION}-bin.zip"
