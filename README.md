@@ -60,6 +60,7 @@ you should save script on disk before you execute it.
    * [samba-server-public.sh](./fedora-post-install/samba-server-public.sh)
    * [selinux-off.sh](./fedora-post-install/selinux-off.sh)
    * [sshesame.sh](./fedora-post-install/sshesame.sh)
+   * [streama-server.sh](./fedora-post-install/streama-server.sh)
    * [teamspeak3-client.sh](./fedora-post-install/teamspeak3-client.sh)
    * [vim.sh](./fedora-post-install/vim.sh)
  * [rhel-post-install](./rhel-post-install)
