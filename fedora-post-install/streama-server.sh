@@ -62,8 +62,22 @@ fi
 [[ -d "${PACKAGE_POOL}/share/streama" ]] || mkdir -p "${PACKAGE_POOL}/share/streama"
 mv "${TMP_FILE}" "${PACKAGE_POOL}/share/streama/streama.jar"
 
+# Create executable script.
+[[ -d "${PACKAGE_POOL}/sbin" ]] || mkdir -p "${PACKAGE_POOL}/sbin"
+
+cat > "${PACKAGE_POOL}/sbin/streama" <<EOL
+#!/bin/sh
+
+java -jar "${PACKAGE_POOL}/share/streama/streama.jar"
+
+EOL
+
+# Fix script permissions.
+chmod +x "${PACKAGE_POOL}/sbin/streama"
+
 # Create a file that can be used for uninstalling.
 cat > "${PACKAGE_POOL}/share/streama/uninstall.txt" <<EOL
+rm -f "${PACKAGE_POOL}/sbin/streama"
 rm -f "${PACKAGE_POOL}/share/streama/streama.jar"
 rm -f "${PACKAGE_POOL}/share/streama/uninstall.txt"
 rmdir "${PACKAGE_POOL}/share/streama" 2> /dev/null
