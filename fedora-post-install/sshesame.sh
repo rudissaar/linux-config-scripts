@@ -73,7 +73,7 @@ ETC_PATH='/etc/sshesame'
 [[ -d "${ETC_PATH}" ]] || mkdir -p "${ETC_PATH}"
 
 # Link sshesame binary.
-[[ -d "${PACKAGE_POOL}/sbin" ]] || "${PACKAGE_POOL}/sbin"
+[[ -d "${PACKAGE_POOL}/sbin" ]] || mkdir -p "${PACKAGE_POOL}/sbin"
 
 # Create script that reads parameters from file.
 cat > "${PACKAGE_POOL}/sbin/sshesame" <<EOL
