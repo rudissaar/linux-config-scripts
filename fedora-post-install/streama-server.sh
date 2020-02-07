@@ -4,6 +4,11 @@
 PACKAGE_POOL="/usr/local"
 VERSION='1.7.3'
 
+STREAMA_USER='streama'
+STREAMA_UID='891'
+STREAMA_GID='891'
+STREAMA_DIR='/data/streama'
+
 DOWNLOAD_URL="https://github.com/streamaserver/streama/releases/download/v${VERSION}/streama-${VERSION}.jar"
 
 # You need root permissions to run this script.
@@ -75,8 +80,34 @@ EOL
 # Fix script permissions.
 chmod +x "${PACKAGE_POOL}/sbin/streama"
 
+# Create user for streama server.
+if ! getent passwd "${STREAMA_USER}" 1> /dev/null 2>&1; then
+    groupadd \
+        --gid ${STREAMA_GID} \
+        "${STREAMA_USER}"
+
+    useradd \
+        --uid ${STREAMA_UID} \
+        --gid ${STREAMA_GID} \
+        --no-create-home \
+        --home-dir "${STREAMA_DIR}" \
+        --comment 'Self Hosted Media Server' \
+        --shell '/sbin/nologin ' \
+        "${STREAMA_USER}"
+fi
+
+# Make sure that directory for streama exists and has correct permissions.
+[[ -d "${STREAMA_DIR}" ]] || mkdir -p "${STREAMA_DIR}"
+chown -R nobody:"${STREAMA_USER}" "${STREAMA_DIR}"
+chmod g+w "${STREAMA_DIR}"
+chmod g+s "${STREAMA_DIR}"
+
 # Create a file that can be used for uninstalling.
 cat > "${PACKAGE_POOL}/share/streama/uninstall.txt" <<EOL
+userdel "${STREAMA_USER}"
+groupdel "${STREAMA_USER}" 2> /dev/null
+rm -f "/var/spool/mail/${STREAMA_USER}"
+rm -rf "${STREAMA_DIR}"
 rm -f "${PACKAGE_POOL}/sbin/streama"
 rm -f "${PACKAGE_POOL}/share/streama/streama.jar"
 rm -f "${PACKAGE_POOL}/share/streama/uninstall.txt"
