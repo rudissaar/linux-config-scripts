@@ -159,9 +159,9 @@ cat > "${PACKAGE_POOL}/share/sshesame/uninstall.txt" <<EOL
 systemctl stop sshesame
 systemctl disable sshesame
 rm -f /usr/local/lib/systemd/system/sshesame.service
-userdel sshesame
-groupdel sshesame 2> /dev/null
-rm -f /var/spool/mail/sshesame
+userdel "${SSHESAME_USER}"
+groupdel "${SSHESAME_USER}" 2> /dev/null
+rm -f "/var/spool/mail/${SSHESAME_USER}"
 rm -f "${PACKAGE_POOL}/sbin/sshesame"
 rm -f "${GOPATH}/bin/sshesame"
 rm -rf "${GOPATH}/src/github.com/jaksi/sshesame"
