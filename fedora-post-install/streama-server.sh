@@ -126,6 +126,12 @@ EOL
 # Reload systemd daemon.
 systemctl daemon-reload
 
+# Create file for logging.
+touch /var/log/streama.log
+chown root:"${STREAMA_USER}" /var/log/streama.log
+chmod 660 /var/log/streama.log
+chmod +t /var/log/streama.log
+
 # Create a file that can be used for uninstalling.
 cat > "${PACKAGE_POOL}/share/streama/uninstall.txt" <<EOL
 systemctl disable streama
