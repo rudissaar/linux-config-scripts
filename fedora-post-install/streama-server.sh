@@ -114,12 +114,9 @@ After=network.target remote-fs.target nss-lookup.target
 User=${STREAMA_USER}
 Group=${STREAMA_USER}
 WorkingDirectory=${STREAMA_DIR}
-Type=simple
-ExecStart=/bin/sh ${PACKAGE_POOL}/sbin/streama
-TimeoutStopSec=5
-KillMode=process
 PrivateTmp=true
-Restart=always
+ExecStart=java -jar ${PACKAGE_POOL}/share/streama/streama.jar
+SuccessExitStatus=143
 StandardOutput=file:/var/log/streama.log
 
 [Install]
