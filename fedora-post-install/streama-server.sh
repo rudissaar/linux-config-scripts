@@ -102,12 +102,43 @@ chown -R nobody:"${STREAMA_USER}" "${STREAMA_DIR}"
 chmod g+w "${STREAMA_DIR}"
 chmod g+s "${STREAMA_DIR}"
 
+# Create systemd service file for streama server.
+[[ -d "${PACKAGE_POOL}/lib/systemd/system" ]] || mkdir -p "${PACKAGE_POOL}/lib/systemd/system"
+
+cat > "${PACKAGE_POOL}/lib/systemd/system/streama.service" <<EOL
+[Unit]
+Description=Self hosted streaming media server
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+User=${STREAMA_USER}
+Group=${STREAMA_USER}
+WorkingDirectory=${STREAMA_DIR}
+Type=simple
+ExecStart=/bin/sh ${PACKAGE_POOL}/sbin/streama
+TimeoutStopSec=5
+KillMode=process
+PrivateTmp=true
+Restart=always
+StandardOutput=file:/var/log/streama.log
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+# Reload systemd daemon.
+systemctl daemon-reload
+
 # Create a file that can be used for uninstalling.
 cat > "${PACKAGE_POOL}/share/streama/uninstall.txt" <<EOL
+systemctl disable streama
+systemctl stop streama
+rm -f "${PACKAGE_POOL}/lib/systemd/system/streama.service"
 userdel "${STREAMA_USER}"
 groupdel "${STREAMA_USER}" 2> /dev/null
 rm -f "/var/spool/mail/${STREAMA_USER}"
 rm -rf "${STREAMA_DIR}"
+rm -f "/var/log/streama.log"
 rm -f "${PACKAGE_POOL}/sbin/streama"
 rm -f "${PACKAGE_POOL}/share/streama/streama.jar"
 rm -f "${PACKAGE_POOL}/share/streama/uninstall.txt"
