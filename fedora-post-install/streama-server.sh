@@ -3,6 +3,7 @@
 
 PACKAGE_POOL="/usr/local"
 VERSION='1.7.3'
+ENABLE_SERVICES=1
 
 STREAMA_USER='streama'
 STREAMA_UID='891'
@@ -131,6 +132,15 @@ touch /var/log/streama.log
 chown root:"${STREAMA_USER}" /var/log/streama.log
 chmod 660 /var/log/streama.log
 chmod +t /var/log/streama.log
+
+# Configuring service.
+if [[ "${ENABLE_SERVICES}" == '1' ]]; then
+    systemctl enable streama
+    systemctl restart streama
+else
+    systemctl disable streama
+    systemctl stop streama
+fi
 
 # Create a file that can be used for uninstalling.
 cat > "${PACKAGE_POOL}/share/streama/uninstall.txt" <<EOL
