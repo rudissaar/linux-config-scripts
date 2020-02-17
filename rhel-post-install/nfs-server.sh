@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Script that install publicly accessible NFS share on current system.
+# Script that install publically accessible NFS share on current system.
 
-SHARE_DIR='/share'
+SHARE_DIR='/data'
 SHARE_HOSTS='*'
 SHARE_MODE='rw'
 
+ENABLE_SERVICES=1
 RUN_FIREWALL_RULES=0
 
 # You need root permissions to run this script.
@@ -57,12 +58,10 @@ fi
 ENSURE_PACKAGE 'mount.nfs' 'nfs-utils'
 ENSURE_PACKAGE 'fs4_getfacl' 'nfs4-acl-tools'
 
-# Make sure NFS share directory exists.
-if [[ ! -d "${SHARE_DIR}" ]]; then
-    mkdir -p "${SHARE_DIR}"
-fi
+# Make sure that NFS share directory exists.
+[[ -d "${SHARE_DIR}" ]] || mkdir -p "${SHARE_DIR}"
 
-# Apply SELinux rules if necessary.
+# Apply SeLinux rules if necessary.
 if [[ "${SELINUX_ENABLED}" == '1' ]]; then
     setsebool -P nfs_export_all_ro on
     setsebool -P nfs_export_all_rw on
@@ -97,13 +96,23 @@ else
     echo 'firewall-cmd --runtime-to-permanent'
 fi
 
-# Enable RPC Bind service.
-systemctl enable rpcbind
-systemctl restart rpcbind
+# Enable or disable RPC Bind service.
+if [[ "${ENABLE_SERVICES}" == '1' ]]; then
+    systemctl enable rpcbind
+    systemctl restart rpcbind
+else
+    systemctl enable rpcbind
+    systemctl stop rpcbind
+fi
 
-# Enable NFS service.
-systemctl enable nfs-server
-systemctl restart nfs-server
+# Enable or disable NFS service.
+if [[ "${ENABLE_SERVICES}" == '1' ]]; then
+    systemctl enable nfs-server
+    systemctl restart nfs-server
+else
+    systemctl disable nfs-server
+    systemctl stop nfs-server
+fi
 
 # Let user know that script has finished its job.
 echo '> Finished.'
