@@ -50,6 +50,7 @@ you should save script on disk before you execute it.
    * [nfs-server.sh](./fedora-post-install/nfs-server.sh)
    * [nginx-php-stack.sh](./fedora-post-install/nginx-php-stack.sh)
    * [nouveau-off.sh](./fedora-post-install/nouveau-off.sh)
+   * [obs-plugin-linuxbrowser.sh](./fedora-post-install/obs-plugin-linuxbrowser.sh)
    * [old-kernels.sh](./fedora-post-install/old-kernels.sh)
    * [onionshare.sh](./fedora-post-install/onionshare.sh)
    * [openvpn.sh](./fedora-post-install/openvpn.sh)
