@@ -65,6 +65,8 @@ tar --no-same-owner -xzf "${TMP_FILE}" -C "${PLUGINS_DIR}"
 # Fix permissions.
 find "${PLUGINS_DIR}/obs-linuxbrowser" -type d -print0 | xargs -0 chmod 0755
 find "${PLUGINS_DIR}/obs-linuxbrowser" -type f -print0 | xargs -0 chmod 0644
+chmod +x "${PLUGINS_DIR}/obs-linuxbrowser/bin/64bit/*"
+[[ -f "${PLUGINS_DIR}/obs-linuxbrowser/bin/64bit/debug.log" ]] && rm "${PLUGINS_DIR}/obs-linuxbrowser/bin/64bit/debug.log"
 
 # Link library.
 ln -sf "${PLUGINS_DIR}/obs-linuxbrowser/bin/64bit/libobs-linuxbrowser.so" /usr/lib64/obs-plugins/obs-linuxbrowser.so
