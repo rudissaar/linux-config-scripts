@@ -2,7 +2,7 @@
 # Script that installs Apache NetBeans IDE on your system.
 
 PACKAGE_POOL="/usr/local"
-VERSION='11.2'
+VERSION='11.3'
 USE_ICON_FROM_ARCHIVE=0
 
 if [[ "${VERSION}" == '11.0' ]]; then
@@ -106,6 +106,12 @@ Keywords=development;Java;IDE;platform;javafx;javase;
 StartupWMClass=NetBeans IDE ${VERSION}
 EOL
 fi
+
+# Create a file that can be used for uninstalling.
+cat > "${PACKAGE_POOL}/share/netbeans/uninstall.txt" <<EOL
+rm -rf "${PACKAGE_POOL}/share/netbeans"
+rm -f "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop"
+EOL
 
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
