@@ -2,6 +2,7 @@
 # Script that installs nginx and php stack on current system.
 
 ENABLE_SERVICES=1
+SERVER_TOKENS_OFF=1
 SET_CGI_FIX_PATHINFO_TO_0=1
 EXPOSE_PHP_OFF=1
 
@@ -56,6 +57,11 @@ ENSURE_PACKAGE '-' \
 # Fix configuration.
 sed -i 's/^user = .*$/user = nginx/g' /etc/php-fpm.d/www.conf
 sed -i 's/^group = .*$/group = nginx/g' /etc/php-fpm.d/www.conf
+
+if [[ "${SERVER_TOKENS_OFF}" == '1' ]]; then
+    [[ -d /etc/nginx/conf.d ]] || mkdir -p /etc/nginx/conf.d
+    echo 'server_tokens off;' > /etc/nginx/conf.d/server-tokens-off.conf
+fi
 
 if [[ "${SET_CGI_FIX_PATHINFO_TO_0}" == '1' ]]; then
     if ! grep -Fq 'cgi.fix_pathinfo=' /etc/php.ini; then
