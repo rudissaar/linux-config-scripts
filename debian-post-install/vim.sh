@@ -27,13 +27,13 @@ ENSURE_PACKAGE () {
 
     if [[ "${REPO_REFRESHED}" == '0' ]]; then
         echo '> Refreshing package repository.'
-        dnf check-update 1> /dev/null
+        apt-get update 1> /dev/null
         REPO_REFRESHED=1
     fi
 
     for REPO_PACKAGE in ${REPO_PACKAGES}
     do
-        dnf install -y "${REPO_PACKAGE}"
+        apt-get install -y "${REPO_PACKAGE}"
     done
 }
 
