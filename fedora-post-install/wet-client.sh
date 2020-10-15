@@ -116,6 +116,12 @@ MimeType=x-scheme-handler/et;
 Keywords=team-based;multiplayer;tactical;WWII;enemy;territory;
 EOL
 
+# Create a file that can be used for uninstalling.
+cat > "${WET_DIR}/uninstall.txt" <<EOL
+rm -rf "${WET_DIR}"
+rm -f '/usr/share/applications/wet.desktop'
+EOL
+
 # Cleanup.
 rm -rf "${TMP_FILE}" "${TMP_PATH}"
 
