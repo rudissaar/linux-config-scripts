@@ -2,7 +2,7 @@
 # Script that installs Apache NetBeans IDE on your system.
 
 PACKAGE_POOL="/usr/local"
-VERSION='11.3'
+VERSION='12.1'
 USE_ICON_FROM_ARCHIVE=0
 
 if [[ "${VERSION}" == '11.0' ]]; then
@@ -87,7 +87,7 @@ done < <(find "${PACKAGE_POOL}/share/netbeans/bin" -maxdepth 1 -type f -executab
 # Create desktop entry for application.
 if [[ ! -f "${PACKAGE_POOL}/share/applications/apache-netbeans.desktop" ]]; then
     if [[ "${USE_ICON_FROM_ARCHIVE}" != '0' ]]; then
-        ICON="${PACKAGE_POOL}/share/netbeans/nb/netbans.png"
+        ICON="${PACKAGE_POOL}/share/netbeans/nb/netbeans.png"
     else
         ICON='netbeans'
     fi
