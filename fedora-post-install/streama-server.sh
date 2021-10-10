@@ -2,7 +2,7 @@
 # Script that installs Streama media server on your system.
 
 PACKAGE_POOL="/usr/local"
-VERSION='1.7.3'
+VERSION='1.10.3'
 ENABLE_SERVICES=1
 
 STREAMA_USER='streama'
