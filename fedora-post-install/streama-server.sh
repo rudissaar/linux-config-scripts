@@ -50,9 +50,8 @@ ENSURE_PACKAGE () {
 REPO_REFRESHED=0
 
 # Install dependencies if necessary.
-ENSURE_PACKAGE '-' 'groovy-lib'
 ENSURE_PACKAGE 'wget'
-ENSURE_PACKAGE 'java' 'java-latest-openjdk'
+ENSURE_PACKAGE '-' 'java-1.8.0-openjdk'
 
 # Download Streama archive.
 TMP_DATE="$(date +%s)"
@@ -74,7 +73,7 @@ mv "${TMP_FILE}" "${PACKAGE_POOL}/share/streama/streama.jar"
 cat > "${PACKAGE_POOL}/sbin/streama" <<EOL
 #!/bin/sh
 
-java -jar "${PACKAGE_POOL}/share/streama/streama.jar"
+/usr/lib/jvm/jre-1.8.0/bin/java -jar "${PACKAGE_POOL}/share/streama/streama.jar"
 
 EOL
 
@@ -116,7 +115,7 @@ User=${STREAMA_USER}
 Group=${STREAMA_USER}
 WorkingDirectory=${STREAMA_DIR}
 PrivateTmp=true
-ExecStart=java -jar ${PACKAGE_POOL}/share/streama/streama.jar
+ExecStart=/usr/lib/jvm/jre-1.8.0/bin/java -jar ${PACKAGE_POOL}/share/streama/streama.jar
 SuccessExitStatus=143
 StandardOutput=file:/var/log/streama.log
 
@@ -160,4 +159,3 @@ EOL
 
 # Let user know that script has finished its job.
 echo '> Finished.'
-
