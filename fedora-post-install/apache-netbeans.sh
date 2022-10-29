@@ -2,7 +2,7 @@
 # Script that installs Apache NetBeans IDE on your system.
 
 PACKAGE_POOL="/usr/local"
-VERSION='12.2'
+VERSION='15'
 USE_ICON_FROM_ARCHIVE=0
 
 if [[ "${VERSION}" == '11.0' ]]; then
@@ -63,8 +63,8 @@ TMP_DATE="$(date +%s)"
 TMP_FILE="/tmp/apache-netbeans-${TMP_DATE}.zip"
 TMP_PATH="/tmp/apache-netbeans-${TMP_DATE}"
 
-if ! wget "${DOWNLOAD_EU_URL}" -O "${TMP_FILE}"; then
-    if ! wget "${DOWNLOAD_US_URL}" -O "${TMP_FILE}"; then
+if ! wget --inet4-only "${DOWNLOAD_EU_URL}" -O "${TMP_FILE}"; then
+    if ! wget --inet4-only "${DOWNLOAD_US_URL}" -O "${TMP_FILE}"; then
         echo '> Unable to download required files, exiting.'
         echo '> Aborting.'
         exit 1
