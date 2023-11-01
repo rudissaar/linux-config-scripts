@@ -46,6 +46,7 @@ you should save script on disk before you execute it.
    * [grub-efi.sh](./fedora-post-install/grub-efi.sh)
    * [hla.sh](./fedora-post-install/hla.sh)
    * [libvirt-qemu-kvm.sh](./fedora-post-install/libvirt-qemu-kvm.sh)
+   * [mate-numix-icon-theme-square-light.sh](./fedora-post-install/mate-numix-icon-theme-square-light.sh)
    * [mariadb.sh](./fedora-post-install/mariadb.sh)
    * [minetest-server.sh](./fedora-post-install/minetest-server.sh)
    * [nfs-server.sh](./fedora-post-install/nfs-server.sh)
