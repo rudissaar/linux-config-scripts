@@ -2,7 +2,7 @@
 # Script that installs Apache NetBeans IDE on your system.
 
 PACKAGE_POOL="/usr/local"
-VERSION='21'
+VERSION='22'
 USE_ICON_FROM_ARCHIVE=0
 
 if [[ "${VERSION}" == '11.0' ]]; then
